@@ -107,6 +107,7 @@ void main_layout(ChessTextures *chess_pieces, char board[8][8]) {
             .width = CLAY_SIZING_GROW(),
             },
           .padding = CLAY_PADDING_ALL(8),
+          .childAlignment = {.x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER}
         },
         .backgroundColor = {80, 80, 80, 255},
   }) {
