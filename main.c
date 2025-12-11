@@ -20,7 +20,7 @@ int main(void) {
                       {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
                       {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}};
 
-  Clay_Raylib_Initialize(800, 400, "test window", FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
+  Clay_Raylib_Initialize(800, 800, "chess", FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
 
   uint64_t clay_required_memory = Clay_MinMemorySize();
 
