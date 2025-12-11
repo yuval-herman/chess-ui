@@ -2,7 +2,27 @@
 #include "definitions.h"
 #include <raylib.h>
 
-void board_layout(ChessTextures *chess_pieces) {
+// Returns a chess piece texture for the received char.
+// Returns white variant for white==true, black otherwise.
+Texture2D* char2tex(ChessTextures *tex, char c) {
+  switch (c) {
+    case 'b': return &tex->b_bishop;
+    case 'B': return &tex->w_bishop;
+    case 'k': return &tex->b_king;
+    case 'K': return &tex->w_king;
+    case 'n': return &tex->b_knight;
+    case 'N': return &tex->w_knight;
+    case 'p': return &tex->b_pawn;
+    case 'P': return &tex->w_pawn;
+    case 'q': return &tex->b_queen;
+    case 'Q': return &tex->w_queen;
+    case 'r': return &tex->b_rook;
+    case 'R': return &tex->w_rook;
+    default: return NULL;
+  }
+}
+
+void board_layout(ChessTextures *chess_pieces, char board[8][8]) {
   Clay_Color even_cell_color = {100, 100, 100, 255};
   Clay_Color odd_cell_color  = {125, 125, 125, 255};
   CLAY(CLAY_ID("BoardContainer"), {
@@ -48,7 +68,7 @@ void board_layout(ChessTextures *chess_pieces) {
                   .width = CLAY_SIZING_GROW(0),
                 }
               },
-              .image = { .imageData = &chess_pieces->b_bishop },
+              .image = { .imageData = char2tex(chess_pieces, board[row][col]) },
               .aspectRatio = {1}
             }) {}
           }
@@ -58,7 +78,7 @@ void board_layout(ChessTextures *chess_pieces) {
   }
 }
 
-void main_layout(ChessTextures *chess_pieces) {
+void main_layout(ChessTextures *chess_pieces, char board[8][8]) {
   CLAY(CLAY_ID("WindowContainer"), {
         .layout = {
           .sizing = {
@@ -69,6 +89,6 @@ void main_layout(ChessTextures *chess_pieces) {
         },
         .backgroundColor = {80, 80, 80, 255},
   }) {
-    board_layout(chess_pieces);
+    board_layout(chess_pieces, board);
   }
 }

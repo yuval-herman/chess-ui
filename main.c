@@ -11,6 +11,15 @@ void HandleClayErrors(Clay_ErrorData error_data) {
 }
 
 int main(void) {
+  char board[8][8] = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
+                      {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
+                      {'#', '#', '#', '#', '#', '#', '#', '#'},
+                      {'#', '#', '#', '#', '#', '#', '#', '#'},
+                      {'#', '#', '#', '#', '#', '#', '#', '#'},
+                      {'#', '#', '#', '#', '#', '#', '#', '#'},
+                      {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
+                      {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}};
+
   Clay_Raylib_Initialize(800, 400, "test window", FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
 
   uint64_t clay_required_memory = Clay_MinMemorySize();
@@ -46,7 +55,7 @@ int main(void) {
     Clay_UpdateScrollContainers(true, (Clay_Vector2){scrollDelta.x, scrollDelta.y}, GetFrameTime());
 
     Clay_BeginLayout();
-    main_layout(&chess_textures);
+    main_layout(&chess_textures, board);
 
     Clay_RenderCommandArray renderCommands = Clay_EndLayout();
 
