@@ -8,6 +8,7 @@ int main(int argc, char **argv) {
 
   nob_cc(&cmd);
   nob_cc_flags(&cmd);
+  nob_cmd_append(&cmd, "-g", "-O0");
   nob_cc_output(&cmd, "main");
   nob_cc_inputs(&cmd, "main.c");
   nob_cmd_append(&cmd, "-lm", "-lraylib");
