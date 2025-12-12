@@ -1,6 +1,7 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 #include <raylib.h>
+#include "clay.h"
 
 typedef struct {
   struct {
@@ -19,6 +20,12 @@ typedef struct {
       Texture2D b_pawn;
     } chess_pieces;
   } textures;
+  struct {
+      Clay_Color background;
+      Clay_Color board_background;
+      Clay_Color even_cell;
+      Clay_Color odd_cell;
+  } colors;
 } UIData;
 
 extern UIData UI;

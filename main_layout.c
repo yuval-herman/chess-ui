@@ -39,8 +39,6 @@ void handle_board_cell_hover(Clay_ElementId element_id,
 }
 
 void board_layout(char board[8][8]) {
-  Clay_Color even_cell_color = {100, 100, 100, 255};
-  Clay_Color odd_cell_color  = {125, 125, 125, 255};
   static int selected_row = -1;
   static int selected_col = -1;
   static BoardHoverData click_data = {&selected_row, &selected_col};
@@ -55,7 +53,7 @@ void board_layout(char board[8][8]) {
           .childGap = 8,
           .padding = CLAY_PADDING_ALL(8),
       },
-      .backgroundColor = {112, 112, 112, 255},
+      .backgroundColor = UI.colors.board_background,
       .aspectRatio = {.aspectRatio = 1}
     }) {
     for (int row = 0; row < 8; row++) {
@@ -69,7 +67,7 @@ void board_layout(char board[8][8]) {
             }
         }) {
         for (int col = 0; col < 8; col++) {
-          Clay_Color cell_color = (row + col) % 2 ? odd_cell_color : even_cell_color;
+          Clay_Color cell_color = (row + col) % 2 ? UI.colors.odd_cell : UI.colors.even_cell;
           CLAY(CLAY_IDI("cell", col + row * 8),{
                 .layout = {
                   .sizing = {
@@ -109,7 +107,7 @@ void main_layout(char board[8][8]) {
           .padding = CLAY_PADDING_ALL(8),
           .childAlignment = {.x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER}
         },
-        .backgroundColor = {80, 80, 80, 255},
+        .backgroundColor = UI.colors.background,
   }) {
     board_layout(board);
   }
