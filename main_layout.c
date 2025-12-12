@@ -34,8 +34,17 @@ void handle_board_cell_hover(Clay_ElementId element_id,
   if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
     int col = element_id.offset % 8;
     int row = (element_id.offset - col) / 8;
-    STATE.selected.col = col;
-    STATE.selected.row = row;
+    if (STATE.selected.col >= 0) {
+      char piece = STATE.board[STATE.selected.row][STATE.selected.col];
+      STATE.board[STATE.selected.row][STATE.selected.col] = '#';
+      STATE.board[row][col] = piece;
+
+      STATE.selected.col = -1;
+      STATE.selected.row = -1;
+    } else {
+      STATE.selected.col = col;
+      STATE.selected.row = row;
+    }
   }
 }
 
