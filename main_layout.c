@@ -31,6 +31,9 @@ void handle_board_cell_hover(Clay_ElementId element_id,
     int row = (element_id.offset - col) / 8;
     if (STATE.selected.col >= 0) {
       char piece = STATE.board[STATE.selected.row][STATE.selected.col];
+      STATE.moves.items[STATE.moves.count][0] = (Cell){STATE.selected.row, STATE.selected.col};
+      STATE.moves.items[STATE.moves.count][1] = (Cell){row, col};
+      STATE.moves.count++;
       STATE.board[STATE.selected.row][STATE.selected.col] = '#';
       STATE.board[row][col] = piece;
 
@@ -125,16 +128,22 @@ void main_layout() {
       .backgroundColor = UI.colors.board_background
     }) {
       CLAY_TEXT(CLAY_STRING("Move history:"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
-      CLAY(CLAY_ID("MoveHistoryPanle"), {
+      CLAY(CLAY_ID("MoveHistoryPanel"), {
           .layout = {
             .sizing = {
               .width = CLAY_SIZING_GROW(),
               .height = CLAY_SIZING_GROW(),
-            }
+            },
+            .childGap = 8,
+            .padding = CLAY_PADDING_ALL(8)
           },
           .backgroundColor = UI.colors.light_background
         }
-      );
+      ) {
+        for (size_t i = 0; i < STATE.moves.count; i++) {
+          CLAY_TEXT(CLAY_STRING("Move history:"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+        }
+      }
     }
   }
 }

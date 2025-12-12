@@ -35,8 +35,16 @@ typedef struct {
 } Cell;
 
 typedef struct {
+  //TODO: proper DA managment soon TBD
+  Cell items[32][2];
+  size_t count;
+  size_t capacity;
+} MovesDA;
+
+typedef struct {
   char board[8][8];
   Cell selected;
+  MovesDA moves;
 } GameState;
 
 extern UIData UI;
