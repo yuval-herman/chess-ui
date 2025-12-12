@@ -28,6 +28,11 @@ typedef struct {
   } colors;
 } UIData;
 
+typedef struct {
+  char board[8][8];
+} GameState;
+
 extern UIData UI;
+extern GameState STATE;
 
 #endif // DEFINITIONS_H

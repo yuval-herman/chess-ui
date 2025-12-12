@@ -1,12 +1,14 @@
 #include "definitions.h"
 #include "stdio.h"
 #include <raylib.h>
+#include <string.h>
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
 #include "clay_renderer_raylib.c"
 #include "main_layout.c"
 
 UIData UI = {0};
+GameState STATE = {0};
 
 void HandleClayErrors(Clay_ErrorData error_data) {
   printf("%s", error_data.errorText.chars);
@@ -32,7 +34,7 @@ void initUIData() {
   UI.colors.odd_cell         = (Clay_Color){125, 125, 125, 255};
 }
 
-int main(void) {
+void initGameState() {
   char board[8][8] = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
                       {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
                       {'#', '#', '#', '#', '#', '#', '#', '#'},
@@ -41,10 +43,14 @@ int main(void) {
                       {'#', '#', '#', '#', '#', '#', '#', '#'},
                       {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
                       {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}};
+  memcpy(STATE.board, board, 8 * 8);
+}
 
+int main(void) {
   Clay_Raylib_Initialize(800, 800, "chess", FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
 
   initUIData();
+  initGameState();
 
   uint64_t clay_required_memory = Clay_MinMemorySize();
 
@@ -70,7 +76,7 @@ int main(void) {
     Clay_UpdateScrollContainers(true, (Clay_Vector2){scrollDelta.x, scrollDelta.y}, GetFrameTime());
 
     Clay_BeginLayout();
-    main_layout(board);
+    main_layout();
 
     Clay_RenderCommandArray renderCommands = Clay_EndLayout();
 

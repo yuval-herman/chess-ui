@@ -38,7 +38,7 @@ void handle_board_cell_hover(Clay_ElementId element_id,
   }
 }
 
-void board_layout(char board[8][8]) {
+void board_layout() {
   static int selected_row = -1;
   static int selected_col = -1;
   static BoardHoverData click_data = {&selected_row, &selected_col};
@@ -87,7 +87,7 @@ void board_layout(char board[8][8]) {
                   .width = CLAY_SIZING_GROW(0),
                 }
               },
-              .image = { .imageData = char2tex(board[row][col]) },
+              .image = { .imageData = char2tex(STATE.board[row][col]) },
               .aspectRatio = {1}
             }) {}
           }
@@ -97,7 +97,7 @@ void board_layout(char board[8][8]) {
   }
 }
 
-void main_layout(char board[8][8]) {
+void main_layout() {
   CLAY(CLAY_ID("WindowContainer"), {
         .layout = {
           .sizing = {
@@ -109,6 +109,6 @@ void main_layout(char board[8][8]) {
         },
         .backgroundColor = UI.colors.background,
   }) {
-    board_layout(board);
+    board_layout();
   }
 }
