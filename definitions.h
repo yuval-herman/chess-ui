@@ -23,6 +23,7 @@ typedef struct {
   struct {
       Clay_Color background;
       Clay_Color board_background;
+      Clay_Color light_background;
       Clay_Color even_cell;
       Clay_Color odd_cell;
       Clay_Color highlighted_cell;
@@ -30,7 +31,7 @@ typedef struct {
 } UIData;
 
 typedef struct {
-  char col, row;
+  int col, row;
 } Cell;
 
 typedef struct {

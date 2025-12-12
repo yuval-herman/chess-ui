@@ -11,7 +11,8 @@ UIData UI = {0};
 GameState STATE = {0};
 
 void HandleClayErrors(Clay_ErrorData error_data) {
-  printf("%s", error_data.errorText.chars);
+  printf("CLAY ERROR: %s\n", error_data.errorText.chars);
+  exit(1);
 }
 
 void initUIData() {
@@ -29,6 +30,7 @@ void initUIData() {
   UI.textures.chess_pieces.w_rook   = LoadTexture("sprites/rl.png");
 
   UI.colors.background       = (Clay_Color){80, 80, 80, 255};
+  UI.colors.light_background = (Clay_Color){150, 150, 150, 255};
   UI.colors.board_background = (Clay_Color){112, 112, 112, 255};
   UI.colors.even_cell        = (Clay_Color){100, 100, 100, 255};
   UI.colors.odd_cell         = (Clay_Color){125, 125, 125, 255};
@@ -49,7 +51,7 @@ void initGameState() {
 }
 
 int main(void) {
-  Clay_Raylib_Initialize(800, 800, "chess", FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
+  Clay_Raylib_Initialize(1500, 800, "chess", FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
 
   initUIData();
   initGameState();

@@ -23,14 +23,9 @@ Texture2D* char2tex(char c) {
   }
 }
 
-typedef struct {
-  int *selected_row;
-  int *selected_col;
-} BoardHoverData;
-
 void handle_board_cell_hover(Clay_ElementId element_id,
                              Clay_PointerData pointer_data, void *user_data) {
-  BoardHoverData *click_data = user_data;
+  (void)user_data;
   if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
     int col = element_id.offset % 8;
     int row = (element_id.offset - col) / 8;
@@ -112,10 +107,34 @@ void main_layout() {
             .width = CLAY_SIZING_GROW(),
             },
           .padding = CLAY_PADDING_ALL(8),
-          .childAlignment = {.x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER}
+          .childAlignment = {.x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER},
+          .childGap = 8
         },
         .backgroundColor = UI.colors.background,
   }) {
     board_layout();
+    CLAY(CLAY_ID("InfoPanel"), {
+      .layout = {
+        .sizing = {
+          .width = CLAY_SIZING_GROW(50, 500),
+          .height = CLAY_SIZING_GROW(),
+        },
+        .layoutDirection = CLAY_TOP_TO_BOTTOM,
+        .padding = CLAY_PADDING_ALL(8)
+      },
+      .backgroundColor = UI.colors.board_background
+    }) {
+      CLAY_TEXT(CLAY_STRING("Move history:"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
+      CLAY(CLAY_ID("MoveHistoryPanle"), {
+          .layout = {
+            .sizing = {
+              .width = CLAY_SIZING_GROW(),
+              .height = CLAY_SIZING_GROW(),
+            }
+          },
+          .backgroundColor = UI.colors.light_background
+        }
+      );
+    }
   }
 }
