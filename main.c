@@ -32,6 +32,7 @@ void initUIData() {
   UI.colors.board_background = (Clay_Color){112, 112, 112, 255};
   UI.colors.even_cell        = (Clay_Color){100, 100, 100, 255};
   UI.colors.odd_cell         = (Clay_Color){125, 125, 125, 255};
+  UI.colors.highlighted_cell = (Clay_Color){125, 125, 100, 255};
 }
 
 void initGameState() {
@@ -44,6 +45,7 @@ void initGameState() {
                       {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
                       {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}};
   memcpy(STATE.board, board, 8 * 8);
+  STATE.selected = (Cell){-1, -1};
 }
 
 int main(void) {

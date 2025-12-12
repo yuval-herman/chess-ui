@@ -1,6 +1,7 @@
 #include "clay.h"
 #include "definitions.h"
 #include <raylib.h>
+#include <time.h>
 
 // Returns a chess piece texture for the received char.
 // Returns white variant for white==true, black otherwise.
@@ -33,16 +34,12 @@ void handle_board_cell_hover(Clay_ElementId element_id,
   if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
     int col = element_id.offset % 8;
     int row = (element_id.offset - col) / 8;
-    *click_data->selected_col = col;
-    *click_data->selected_row = row;
+    STATE.selected.col = col;
+    STATE.selected.row = row;
   }
 }
 
 void board_layout() {
-  static int selected_row = -1;
-  static int selected_col = -1;
-  static BoardHoverData click_data = {&selected_row, &selected_col};
-
   CLAY(CLAY_ID("BoardContainer"), {
        .layout = {
           .layoutDirection = CLAY_TOP_TO_BOTTOM,
@@ -68,6 +65,7 @@ void board_layout() {
         }) {
         for (int col = 0; col < 8; col++) {
           Clay_Color cell_color = (row + col) % 2 ? UI.colors.odd_cell : UI.colors.even_cell;
+          bool cell_selected = row == STATE.selected.row && col == STATE.selected.col;
           CLAY(CLAY_IDI("cell", col + row * 8),{
                 .layout = {
                   .sizing = {
@@ -76,10 +74,10 @@ void board_layout() {
                     }
                   },
                 .cornerRadius = CLAY_CORNER_RADIUS(4),
-                .backgroundColor = (Clay_Hovered() || (row == selected_row && col == selected_col)) ? (Clay_Color){125,125,100,255} : cell_color,
+                .backgroundColor = (Clay_Hovered() || cell_selected) ? UI.colors.highlighted_cell : cell_color,
                 .aspectRatio = {.aspectRatio = 1}
           }) {
-            Clay_OnHover(handle_board_cell_hover, &click_data);
+            Clay_OnHover(handle_board_cell_hover, NULL);
             CLAY_AUTO_ID({
               .layout = {
                 .sizing = {

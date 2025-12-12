@@ -25,11 +25,17 @@ typedef struct {
       Clay_Color board_background;
       Clay_Color even_cell;
       Clay_Color odd_cell;
+      Clay_Color highlighted_cell;
   } colors;
 } UIData;
 
 typedef struct {
+  char col, row;
+} Cell;
+
+typedef struct {
   char board[8][8];
+  Cell selected;
 } GameState;
 
 extern UIData UI;
