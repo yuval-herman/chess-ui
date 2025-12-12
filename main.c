@@ -10,6 +10,8 @@ void HandleClayErrors(Clay_ErrorData error_data) {
   printf("%s", error_data.errorText.chars);
 }
 
+UIData UI = {0};
+
 int main(void) {
   char board[8][8] = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
                       {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
@@ -26,14 +28,18 @@ int main(void) {
 
   Clay_Arena clay_memory = Clay_CreateArenaWithCapacityAndMemory(clay_required_memory, malloc(clay_required_memory));
 
-  ChessTextures chess_textures = {
-      .b_bishop = LoadTexture("sprites/bd.png"), .w_bishop = LoadTexture("sprites/bl.png"),
-      .b_king   = LoadTexture("sprites/kd.png"),   .w_king = LoadTexture("sprites/kl.png"),
-      .b_knight = LoadTexture("sprites/nd.png"), .w_knight = LoadTexture("sprites/nl.png"),
-      .b_pawn   = LoadTexture("sprites/pd.png"),   .w_pawn = LoadTexture("sprites/pl.png"),
-      .b_queen  = LoadTexture("sprites/qd.png"),  .w_queen = LoadTexture("sprites/ql.png"),
-      .b_rook   = LoadTexture("sprites/rd.png"),   .w_rook = LoadTexture("sprites/rl.png"),
-  };
+  UI.textures.chess_pieces.b_bishop = LoadTexture("sprites/bd.png");
+  UI.textures.chess_pieces.w_bishop = LoadTexture("sprites/bl.png");
+  UI.textures.chess_pieces.b_king   = LoadTexture("sprites/kd.png");
+  UI.textures.chess_pieces.w_king   = LoadTexture("sprites/kl.png");
+  UI.textures.chess_pieces.b_knight = LoadTexture("sprites/nd.png");
+  UI.textures.chess_pieces.w_knight = LoadTexture("sprites/nl.png");
+  UI.textures.chess_pieces.b_pawn   = LoadTexture("sprites/pd.png");
+  UI.textures.chess_pieces.w_pawn   = LoadTexture("sprites/pl.png");
+  UI.textures.chess_pieces.b_queen  = LoadTexture("sprites/qd.png");
+  UI.textures.chess_pieces.w_queen  = LoadTexture("sprites/ql.png");
+  UI.textures.chess_pieces.b_rook   = LoadTexture("sprites/rd.png");
+  UI.textures.chess_pieces.w_rook   = LoadTexture("sprites/rl.png");
 
   Clay_Initialize(
       clay_memory,
@@ -55,7 +61,7 @@ int main(void) {
     Clay_UpdateScrollContainers(true, (Clay_Vector2){scrollDelta.x, scrollDelta.y}, GetFrameTime());
 
     Clay_BeginLayout();
-    main_layout(&chess_textures, board);
+    main_layout(board);
 
     Clay_RenderCommandArray renderCommands = Clay_EndLayout();
 

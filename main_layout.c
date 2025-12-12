@@ -4,20 +4,20 @@
 
 // Returns a chess piece texture for the received char.
 // Returns white variant for white==true, black otherwise.
-Texture2D* char2tex(ChessTextures *tex, char c) {
+Texture2D* char2tex(char c) {
   switch (c) {
-    case 'b': return &tex->b_bishop;
-    case 'B': return &tex->w_bishop;
-    case 'k': return &tex->b_king;
-    case 'K': return &tex->w_king;
-    case 'n': return &tex->b_knight;
-    case 'N': return &tex->w_knight;
-    case 'p': return &tex->b_pawn;
-    case 'P': return &tex->w_pawn;
-    case 'q': return &tex->b_queen;
-    case 'Q': return &tex->w_queen;
-    case 'r': return &tex->b_rook;
-    case 'R': return &tex->w_rook;
+    case 'b': return &UI.textures.chess_pieces.b_bishop;
+    case 'B': return &UI.textures.chess_pieces.w_bishop;
+    case 'k': return &UI.textures.chess_pieces.b_king;
+    case 'K': return &UI.textures.chess_pieces.w_king;
+    case 'n': return &UI.textures.chess_pieces.b_knight;
+    case 'N': return &UI.textures.chess_pieces.w_knight;
+    case 'p': return &UI.textures.chess_pieces.b_pawn;
+    case 'P': return &UI.textures.chess_pieces.w_pawn;
+    case 'q': return &UI.textures.chess_pieces.b_queen;
+    case 'Q': return &UI.textures.chess_pieces.w_queen;
+    case 'r': return &UI.textures.chess_pieces.b_rook;
+    case 'R': return &UI.textures.chess_pieces.w_rook;
     default: return NULL;
   }
 }
@@ -38,7 +38,7 @@ void handle_board_cell_hover(Clay_ElementId element_id,
   }
 }
 
-void board_layout(ChessTextures *chess_pieces, char board[8][8]) {
+void board_layout(char board[8][8]) {
   Clay_Color even_cell_color = {100, 100, 100, 255};
   Clay_Color odd_cell_color  = {125, 125, 125, 255};
   static int selected_row = -1;
@@ -89,7 +89,7 @@ void board_layout(ChessTextures *chess_pieces, char board[8][8]) {
                   .width = CLAY_SIZING_GROW(0),
                 }
               },
-              .image = { .imageData = char2tex(chess_pieces, board[row][col]) },
+              .image = { .imageData = char2tex(board[row][col]) },
               .aspectRatio = {1}
             }) {}
           }
@@ -99,7 +99,7 @@ void board_layout(ChessTextures *chess_pieces, char board[8][8]) {
   }
 }
 
-void main_layout(ChessTextures *chess_pieces, char board[8][8]) {
+void main_layout(char board[8][8]) {
   CLAY(CLAY_ID("WindowContainer"), {
         .layout = {
           .sizing = {
@@ -111,6 +111,6 @@ void main_layout(ChessTextures *chess_pieces, char board[8][8]) {
         },
         .backgroundColor = {80, 80, 80, 255},
   }) {
-    board_layout(chess_pieces, board);
+    board_layout(board);
   }
 }
