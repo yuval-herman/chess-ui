@@ -31,12 +31,17 @@ typedef struct {
 } UIData;
 
 typedef struct {
-  int col, row;
+  int row, col;
 } Cell;
 
 typedef struct {
+  Cell src;
+  Cell dst;
+} Move;
+
+typedef struct {
   //TODO: proper DA managment soon TBD
-  Cell items[32][2];
+  Move *items;
   size_t count;
   size_t capacity;
 } MovesDA;

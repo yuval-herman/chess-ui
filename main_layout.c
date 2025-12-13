@@ -1,7 +1,15 @@
 #include "clay.h"
 #include "definitions.h"
+#include <assert.h>
 #include <raylib.h>
+#include <string.h>
 #include <time.h>
+
+// Average chess games have around 30-40 moves.
+// The moves log shows moves in this format:
+// "e2, b8" 6 chars
+// I allow up to 200 moves per game, if you want longer games, adjust this accordingly.
+char move_log_buffer[200][6];
 
 // Returns a chess piece texture for the received char.
 // Returns white variant for white==true, black otherwise.
@@ -23,6 +31,20 @@ Texture2D* char2tex(char c) {
   }
 }
 
+void make_chess_move(Move move) {
+  MovesDA *moves = &STATE.moves;
+  assert(moves->capacity); // Capacity should be initialized elsewhere
+  if (moves->count == moves->capacity) {
+    moves->capacity *= 2;
+    moves->items = realloc(moves->items, moves->capacity * sizeof(moves->items[0]));
+  }
+  moves->items[moves->count++] = move;
+  // update board
+  char piece = STATE.board[move.src.row][move.src.col];
+  STATE.board[move.src.row][move.src.col] = '#';
+  STATE.board[move.dst.row][move.dst.col] = piece;
+}
+
 void handle_board_cell_hover(Clay_ElementId element_id,
                              Clay_PointerData pointer_data, void *user_data) {
   (void)user_data;
@@ -30,12 +52,11 @@ void handle_board_cell_hover(Clay_ElementId element_id,
     int col = element_id.offset % 8;
     int row = (element_id.offset - col) / 8;
     if (STATE.selected.col >= 0) {
-      char piece = STATE.board[STATE.selected.row][STATE.selected.col];
-      STATE.moves.items[STATE.moves.count][0] = (Cell){STATE.selected.row, STATE.selected.col};
-      STATE.moves.items[STATE.moves.count][1] = (Cell){row, col};
-      STATE.moves.count++;
-      STATE.board[STATE.selected.row][STATE.selected.col] = '#';
-      STATE.board[row][col] = piece;
+      make_chess_move((Move){
+          .src = {STATE.selected.row, STATE.selected.col},
+          .dst = {row, col},
+      });
+
 
       STATE.selected.col = -1;
       STATE.selected.row = -1;
@@ -134,6 +155,7 @@ void main_layout() {
               .width = CLAY_SIZING_GROW(),
               .height = CLAY_SIZING_GROW(),
             },
+            .layoutDirection = CLAY_TOP_TO_BOTTOM,
             .childGap = 8,
             .padding = CLAY_PADDING_ALL(8)
           },
@@ -141,7 +163,16 @@ void main_layout() {
         }
       ) {
         for (size_t i = 0; i < STATE.moves.count; i++) {
-          CLAY_TEXT(CLAY_STRING("Move history:"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+          Move move = STATE.moves.items[i];
+          move_log_buffer[i][0] = move.src.col + 'a';
+          move_log_buffer[i][1] = move.src.row + '1';
+          move_log_buffer[i][2] = ',';
+          move_log_buffer[i][3] = ' ';
+          move_log_buffer[i][4] = move.dst.col + 'a';
+          move_log_buffer[i][5] = move.dst.row + '1';
+
+          Clay_String log_line = {.isStaticallyAllocated = true, .length = 6, .chars = move_log_buffer[i]};
+          CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
         }
       }
     }

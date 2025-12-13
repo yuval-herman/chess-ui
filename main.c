@@ -48,6 +48,8 @@ void initGameState() {
                       {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}};
   memcpy(STATE.board, board, 8 * 8);
   STATE.selected = (Cell){-1, -1};
+  STATE.moves.capacity = 1;
+  STATE.moves.items = malloc(sizeof(STATE.moves.items[0]));
 }
 
 int main(void) {
