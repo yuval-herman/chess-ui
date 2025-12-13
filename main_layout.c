@@ -172,7 +172,15 @@ void main_layout() {
           move_log_buffer[i][5] = move.dst.row + '1';
 
           Clay_String log_line = {.isStaticallyAllocated = true, .length = 6, .chars = move_log_buffer[i]};
-          CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+          CLAY(CLAY_IDI("MoveContainer", i), {
+               .layout = {
+                .padding = CLAY_PADDING_ALL(8),
+                .sizing = {.width = CLAY_SIZING_GROW()}
+                },
+               .backgroundColor = UI.colors.board_background
+             }) {
+            CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+          }
         }
       }
     }
