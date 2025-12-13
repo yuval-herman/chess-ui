@@ -1,4 +1,5 @@
 #include "definitions.h"
+#include "game.h"
 #include "stdio.h"
 #include <raylib.h>
 #include <string.h>
@@ -8,7 +9,6 @@
 #include "main_layout.c"
 
 UIData UI = {0};
-GameState STATE = {0};
 
 void HandleClayErrors(Clay_ErrorData error_data) {
   printf("CLAY ERROR: %s\n", error_data.errorText.chars);
@@ -35,21 +35,6 @@ void initUIData() {
   UI.colors.even_cell        = (Clay_Color){100, 100, 100, 255};
   UI.colors.odd_cell         = (Clay_Color){125, 125, 125, 255};
   UI.colors.highlighted_cell = (Clay_Color){125, 125, 100, 255};
-}
-
-void initGameState() {
-  char board[8][8] = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
-                      {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
-                      {'#', '#', '#', '#', '#', '#', '#', '#'},
-                      {'#', '#', '#', '#', '#', '#', '#', '#'},
-                      {'#', '#', '#', '#', '#', '#', '#', '#'},
-                      {'#', '#', '#', '#', '#', '#', '#', '#'},
-                      {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
-                      {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}};
-  memcpy(STATE.board, board, 8 * 8);
-  STATE.selected = (Cell){-1, -1};
-  STATE.moves.capacity = 1;
-  STATE.moves.items = malloc(sizeof(STATE.moves.items[0]));
 }
 
 int main(void) {

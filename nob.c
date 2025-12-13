@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
   nob_cmd_append(&cmd, "-g", "-O0");
   nob_cc_output(&cmd, "main");
   nob_cc_inputs(&cmd, "main.c");
+  nob_cc_inputs(&cmd, "game.c");
   nob_cmd_append(&cmd, "-lm", "-lraylib");
 
   if (!nob_cmd_run(&cmd))

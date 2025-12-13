@@ -39,20 +39,6 @@ typedef struct {
   Cell dst;
 } Move;
 
-typedef struct {
-  //TODO: proper DA managment soon TBD
-  Move *items;
-  size_t count;
-  size_t capacity;
-} MovesDA;
-
-typedef struct {
-  char board[8][8];
-  Cell selected;
-  MovesDA moves;
-} GameState;
-
 extern UIData UI;
-extern GameState STATE;
 
 #endif // DEFINITIONS_H
