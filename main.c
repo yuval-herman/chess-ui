@@ -54,6 +54,14 @@ int main(void) {
     exit(1);
   }
 
+  char* pipe_msg = pipe_get_message();
+  if (strlen(pipe_msg) != 65) {
+    printf("Got unexpected message, panicking\n");
+    exit(1);
+  }
+  set_board(pipe_msg);
+  set_whites_turn(pipe_msg[65]=='0');
+
   Clay_Raylib_Initialize(1500, 800, "chess",
                          FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT |
                              FLAG_VSYNC_HINT);
