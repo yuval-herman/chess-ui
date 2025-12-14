@@ -21,6 +21,9 @@ int main(int argc, char **argv) {
   nob_cc_inputs(&cmd, "game.c");
   nob_cmd_append(&cmd, RAYLIB_LIB);
   nob_cmd_append(&cmd, "-lm");
+#ifdef _WIN32
+  nob_cmd_append(&cmd, "-lopengl32", "-lgdi32", "-lwinmm", "-lshell32");
+#endif
 
   if (!nob_cmd_run(&cmd))
     return 1;
