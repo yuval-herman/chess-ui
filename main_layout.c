@@ -46,7 +46,7 @@ void handle_board_cell_hover(Clay_ElementId element_id,
     int col = element_id.offset % 8;
     int row = (element_id.offset - col) / 8;
     if (UI_STATE.selected.col >= 0) {
-      make_chess_move((Move){
+      int backend_code = make_chess_move((Move){
           .src = {UI_STATE.selected.row, UI_STATE.selected.col},
           .dst = {row, col},
       });

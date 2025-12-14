@@ -51,7 +51,11 @@ void initGameState() {
   STATE.moves.items = malloc(sizeof(STATE.moves.items[0]));
 }
 
-void make_chess_move(Move move) {
+int make_chess_move(Move move) {
+  pipe_send_message(move_repr(move));
+  char* backend_msg = pipe_get_message();
+  if (backend_msg[0] != '0')
+    return backend_msg[0] - '0';
   MovesDA *moves = &STATE.moves;
   assert(moves->capacity); // Capacity should be initialized elsewhere
   if (moves->count == moves->capacity) {
@@ -63,7 +67,7 @@ void make_chess_move(Move move) {
   char piece = STATE.board[move.src.row][move.src.col];
   STATE.board[move.src.row][move.src.col] = '#';
   STATE.board[move.dst.row][move.dst.col] = piece;
-  pipe_send_message(move_repr(move));
+  return 0;
 }
 
 char get_piece_at(Cell cell) {
