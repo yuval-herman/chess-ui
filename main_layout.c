@@ -11,13 +11,20 @@
 // "e2, b8" 6 chars
 // I allow up to 200 moves per game, if you want longer games, adjust this accordingly.
 #define MAX_LOGS 200
+#define BANNER_TIMEOUT 120
 char move_log_buffer[MAX_LOGS][6];
 
 typedef struct {
   Cell selected;
+  int backend_code; // last code received from the backend
+  int banner_timeout;
 } UIState;
 
-UIState UI_STATE = {.selected = {-1, -1}};
+UIState UI_STATE = {
+    .selected = {-1, -1},
+    .backend_code = -1,
+    .banner_timeout = -1,
+};
 
 // Returns a chess piece texture for the received char.
 // Returns white variant for white==true, black otherwise.
@@ -39,6 +46,21 @@ Texture2D* char2tex(char c) {
   }
 }
 
+const char* code2str(int code) {
+  switch (code) {
+  case 0: return "Valid move";
+  case 1: return "Chess";
+  case 2: return "Empty cell";
+  case 3: return "Destination cell is occupied by your own piece";
+  case 4: return "The move results in a chess";
+  case 5: return "Invalid source or dest position";
+  case 6: return "Piece cannot move that way";
+  case 7: return "Source and destination cells are the same";
+  case 8: return "Checkmate";
+  default: return "Error code invalid";
+  }
+}
+
 void handle_board_cell_hover(Clay_ElementId element_id,
                              Clay_PointerData pointer_data, void *user_data) {
   (void)user_data;
@@ -46,10 +68,12 @@ void handle_board_cell_hover(Clay_ElementId element_id,
     int col = element_id.offset % 8;
     int row = (element_id.offset - col) / 8;
     if (UI_STATE.selected.col >= 0) {
-      int backend_code = make_chess_move((Move){
+      UI_STATE.backend_code = make_chess_move((Move){
           .src = {UI_STATE.selected.row, UI_STATE.selected.col},
           .dst = {row, col},
       });
+      if (UI_STATE.backend_code != 0)
+        UI_STATE.banner_timeout = BANNER_TIMEOUT;
 
       UI_STATE.selected.col = -1;
       UI_STATE.selected.row = -1;
@@ -77,6 +101,34 @@ void turn_indicator(bool is_white) {
     },
     .backgroundColor = color
    }) {}
+}
+
+void illegal_move_banner() {
+  if (UI_STATE.backend_code == 0 || UI_STATE.banner_timeout < 0)
+    return;
+  UI_STATE.banner_timeout--;
+  CLAY(CLAY_ID("IllegalMoveBanner"), {
+       .layout = {
+         .sizing = {
+           .width = CLAY_SIZING_GROW(),
+           .height = CLAY_SIZING_GROW()
+         },
+         .childAlignment = {.x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER}
+       },
+      .backgroundColor = UI.colors.banner_background,
+      .floating = {.attachTo = CLAY_ATTACH_TO_PARENT}
+     }) {
+    const char *message = code2str(UI_STATE.backend_code);
+    Clay_String clay_str = {
+        .isStaticallyAllocated = true,
+        .chars = message,
+        .length = strlen(message),
+    };
+    CLAY_TEXT(clay_str, CLAY_TEXT_CONFIG({
+                            .fontSize = 60,
+                            .textColor = (Clay_Color){255, 255, 255, 255},
+                        }));
+  }
 }
 
 void board_layout() {
@@ -150,6 +202,7 @@ void main_layout() {
         },
         .backgroundColor = UI.colors.background,
   }) {
+    illegal_move_banner();
     board_layout();
     CLAY(CLAY_ID("InfoPanel"), {
       .layout = {
