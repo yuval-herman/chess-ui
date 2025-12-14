@@ -1,8 +1,8 @@
 #include "clay.h"
-#include "game.h"
 #include "definitions.h"
+#include "game.h"
+#include "raylib.h"
 #include <assert.h>
-#include <raylib.h>
 #include <string.h>
 #include <time.h>
 

@@ -1,12 +1,11 @@
 #include "definitions.h"
 #include "game.h"
 #include "stdio.h"
-#include <raylib.h>
-#include <string.h>
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
 #include "clay_renderer_raylib.c"
 #include "main_layout.c"
+#include <string.h>
 
 UIData UI = {0};
 
