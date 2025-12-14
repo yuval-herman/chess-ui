@@ -30,7 +30,7 @@ char *move_repr(Move move) {
   return move_repr_buffer;
 }
 
-void set_board(char board[8][8]) { memcpy(STATE.board, board, 8 * 8); }
+void set_board(char *board) { memcpy(STATE.board, board, 8 * 8); }
 
 bool is_whites_turn() { return STATE.white_turn; }
 void set_whites_turn(bool turn) { STATE.white_turn = turn; }
