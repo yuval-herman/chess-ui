@@ -5,6 +5,7 @@
 #include "clay.h"
 #include "clay_renderer_raylib.c"
 #include "main_layout.c"
+#include "communication.h"
 #include <string.h>
 
 UIData UI = {0};
@@ -36,8 +37,26 @@ void initUIData() {
   UI.colors.highlighted_cell = (Clay_Color){125, 125, 100, 255};
 }
 
+static bool cleanup_done = false;
+
+void cleanup() {
+  if (cleanup_done)
+    return;
+  cleanup_done = true;
+  pipe_close();
+}
+
 int main(void) {
-  Clay_Raylib_Initialize(1500, 800, "chess", FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
+  atexit(cleanup);
+
+  if (!pipe_init()) {
+    printf("Failed creating named pipe, exiting...");
+    exit(1);
+  }
+
+  Clay_Raylib_Initialize(1500, 800, "chess",
+                         FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT |
+                             FLAG_VSYNC_HINT);
 
   initUIData();
   initGameState();
@@ -75,7 +94,7 @@ int main(void) {
     Clay_Raylib_Render(renderCommands, fonts);
     EndDrawing();
   }
-  // This function is new since the video was published
+  if (pipe_is_connected()) pipe_send_message("quit");
   Clay_Raylib_Close();
   return 0;
 }
