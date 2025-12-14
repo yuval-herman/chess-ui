@@ -60,6 +60,25 @@ void handle_board_cell_hover(Clay_ElementId element_id,
   }
 }
 
+void turn_indicator(bool is_white) {
+  Clay_Color color = {0};
+  if (is_whites_turn()) {
+    if (is_white)
+      color = UI.colors.turn_indicator;
+  } else if (!is_white) {
+    color = UI.colors.turn_indicator;
+  }
+  CLAY(CLAY_IDI("TurnIndicator", (int)is_white), {
+    .layout = {
+      .sizing = {
+        .width = CLAY_SIZING_GROW(),
+        .height = CLAY_SIZING_FIXED(10)
+      }
+    },
+    .backgroundColor = color
+   }) {}
+}
+
 void board_layout() {
   CLAY(CLAY_ID("BoardContainer"), {
        .layout = {
@@ -72,11 +91,12 @@ void board_layout() {
           .padding = CLAY_PADDING_ALL(8),
       },
       .backgroundColor = UI.colors.board_background,
-      .aspectRatio = {.aspectRatio = 1}
-    }) {
+  }) {
+    turn_indicator(is_white_up());
     for (int row = 0; row < 8; row++) {
-      CLAY_AUTO_ID({
+      CLAY(CLAY_IDI("RowContainer", row), {
             .layout = {
+              .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
               .sizing = {
                 .width = CLAY_SIZING_GROW(),
                 .height = CLAY_SIZING_GROW(),
@@ -113,6 +133,7 @@ void board_layout() {
         }
       }
     }
+    turn_indicator(!is_white_up());
   }
 }
 

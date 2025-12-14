@@ -5,6 +5,7 @@ void set_board(char *board);
 // Is it currently White's turn
 bool is_whites_turn();
 void set_whites_turn(bool turn);
+bool is_white_up();
 int make_chess_move(Move move);
 char get_piece_at(Cell cell);
 // Returns an array of move represantations, each 6 characters long without null termination.

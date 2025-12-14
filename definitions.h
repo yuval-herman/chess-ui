@@ -27,6 +27,7 @@ typedef struct {
       Clay_Color even_cell;
       Clay_Color odd_cell;
       Clay_Color highlighted_cell;
+      Clay_Color turn_indicator;
   } colors;
 } UIData;
 

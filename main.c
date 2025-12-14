@@ -35,6 +35,7 @@ void initUIData() {
   UI.colors.even_cell        = (Clay_Color){100, 100, 100, 255};
   UI.colors.odd_cell         = (Clay_Color){125, 125, 125, 255};
   UI.colors.highlighted_cell = (Clay_Color){125, 125, 100, 255};
+  UI.colors.turn_indicator   = (Clay_Color){125, 125, 100, 255};
 }
 
 static bool cleanup_done = false;
@@ -47,6 +48,7 @@ void cleanup() {
 }
 
 int main(void) {
+#ifndef UI_WORK
   atexit(cleanup);
 
   if (!pipe_init()) {
@@ -61,6 +63,7 @@ int main(void) {
   }
   set_board(pipe_msg);
   set_whites_turn(pipe_msg[65]=='0');
+#endif
 
   Clay_Raylib_Initialize(1500, 800, "chess",
                          FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT |
@@ -102,7 +105,9 @@ int main(void) {
     Clay_Raylib_Render(renderCommands, fonts);
     EndDrawing();
   }
+#ifndef UI_WORK
   if (pipe_is_connected()) pipe_send_message("quit");
+#endif
   Clay_Raylib_Close();
   return 0;
 }

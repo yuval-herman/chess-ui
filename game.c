@@ -2,6 +2,7 @@
 #include "communication.h"
 #include "definitions.h"
 #include <assert.h>
+#include <ctype.h>
 #include <string.h>
 
 typedef struct {
@@ -12,7 +13,8 @@ typedef struct {
 
 typedef struct {
   char board[8][8];
-  bool white_turn; // Is it currently White's turn
+  bool white_up; // Whether white is on the top of the board
+  bool white_turn; // Whether it is currently White's turn
   MovesDA moves;
 } GameState;
 
@@ -30,32 +32,47 @@ char *move_repr(Move move) {
   return move_repr_buffer;
 }
 
-void set_board(char *board) { memcpy(STATE.board, board, 8 * 8); }
+void set_board(char *board) {
+  memcpy(STATE.board, board, 8 * 8);
+  int white_count = 0;
+  int black_count = 0;
+  for (int i = 0; i<8*4; i++) {
+    if(isupper(board[i])) white_count++;
+    else black_count++;
+  }
+  STATE.white_up = white_count >= black_count;
+}
 
 bool is_whites_turn() { return STATE.white_turn; }
 void set_whites_turn(bool turn) { STATE.white_turn = turn; }
+bool is_white_up() { return STATE.white_up; }
 
 void initGameState() {
+#ifdef UI_WORK
   // default board, good for testing
-  // char board[8][8] = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
-  //                     {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
-  //                     {'#', '#', '#', '#', '#', '#', '#', '#'},
-  //                     {'#', '#', '#', '#', '#', '#', '#', '#'},
-  //                     {'#', '#', '#', '#', '#', '#', '#', '#'},
-  //                     {'#', '#', '#', '#', '#', '#', '#', '#'},
-  //                     {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
-  //                     {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}};
-  // set_board(board);
+  char board[8][8] = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
+                      {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
+                      {'#', '#', '#', '#', '#', '#', '#', '#'},
+                      {'#', '#', '#', '#', '#', '#', '#', '#'},
+                      {'#', '#', '#', '#', '#', '#', '#', '#'},
+                      {'#', '#', '#', '#', '#', '#', '#', '#'},
+                      {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
+                      {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}};
+  set_board((char*)board);
+  set_whites_turn(true);
+#endif
 
   STATE.moves.capacity = 1;
   STATE.moves.items = malloc(sizeof(STATE.moves.items[0]));
 }
 
 int make_chess_move(Move move) {
+#ifndef UI_WORK
   pipe_send_message(move_repr(move));
   char* backend_msg = pipe_get_message();
   if (backend_msg[0] != '0')
     return backend_msg[0] - '0';
+#endif
   MovesDA *moves = &STATE.moves;
   assert(moves->capacity); // Capacity should be initialized elsewhere
   if (moves->count == moves->capacity) {
@@ -67,6 +84,7 @@ int make_chess_move(Move move) {
   char piece = STATE.board[move.src.row][move.src.col];
   STATE.board[move.src.row][move.src.col] = '#';
   STATE.board[move.dst.row][move.dst.col] = piece;
+  STATE.white_turn = !STATE.white_turn;
   return 0;
 }
 
