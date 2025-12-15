@@ -47,7 +47,13 @@ Texture2D* char2tex(char c) {
   }
 }
 
-
+void handle_banner_hover(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
+  (void)element_id;
+  (void)user_data;
+  if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+    UI_STATE.banner_timeout = -1;
+  }
+}
 
 void handle_board_cell_hover(Clay_ElementId element_id,
                              Clay_PointerData pointer_data, void *user_data) {
@@ -106,6 +112,7 @@ void illegal_move_banner() {
       .backgroundColor = UI.colors.banner_background,
       .floating = {.attachTo = CLAY_ATTACH_TO_PARENT}
      }) {
+    Clay_OnHover(handle_banner_hover, NULL);
     const char *message = code2str(UI_STATE.backend_code);
     Clay_String clay_str = {
         .isStaticallyAllocated = true,
