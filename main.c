@@ -1,6 +1,7 @@
 #include "definitions.h"
 #include "game.h"
 #include "stdio.h"
+#include <raylib.h>
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
 #include "clay_renderer_raylib.c"
@@ -82,7 +83,7 @@ int main(void) {
       (Clay_Dimensions){.width = GetScreenWidth(), .height = GetScreenHeight()},
       (Clay_ErrorHandler){HandleClayErrors, NULL});
 
-  Font fonts[1] = {GetFontDefault()};
+  Font fonts[1] = {LoadFontEx("resources/fonts/Roboto-Regular.ttf", 60, NULL, 0)};
   Clay_SetMeasureTextFunction(Raylib_MeasureText, fonts);
 
   // Clay_SetDebugModeEnabled(true);
