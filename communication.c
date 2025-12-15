@@ -139,23 +139,3 @@ void pipe_close() {
     _tprintf(TEXT("Pipe closed.\n"));
   }
 }
-
-// int main() {
-//   if (!pipe_init()) {
-//     printf("Failed creating named pipe, exiting...");
-//     exit(1);
-//   }
-
-//   char *received_msg = pipe_get_message();
-//   if (received_msg != NULL) {
-//     // Process the message
-//     _tprintf(TEXT("\nServer received: %s\n"), (LPTSTR)received_msg);
-
-//     // Send a response
-//     char server_response[] = "quit";
-//     pipe_send_message(server_response);
-//   }
-
-//   pipe_close();
-//   return 0;
-// }
