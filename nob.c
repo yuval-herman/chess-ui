@@ -20,6 +20,7 @@ int main(int argc, char **argv) {
   nob_cc_inputs(&cmd, "main.c");
   nob_cc_inputs(&cmd, "game.c");
   nob_cc_inputs(&cmd, "communication.c");
+  nob_cc_inputs(&cmd, "protocol.c");
   nob_cmd_append(&cmd, RAYLIB_LIB);
   nob_cmd_append(&cmd, "-lm");
 #ifdef _WIN32

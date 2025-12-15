@@ -1,6 +1,6 @@
 #include "game.h"
-#include "communication.h"
 #include "definitions.h"
+#include "protocol.h"
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
@@ -19,18 +19,6 @@ typedef struct {
 } GameState;
 
 GameState STATE = {0};
-
-char move_repr_buffer[4];
-
-// Returns a move represantation the client can understand. Every call
-// overwrites the previous one.
-char *move_repr(Move move) {
-  move_repr_buffer[0] = move.src.col + 'a';
-  move_repr_buffer[1] = 7 - move.src.row + '1';
-  move_repr_buffer[2] = move.dst.col + 'a';
-  move_repr_buffer[3] = 7 - move.dst.row + '1';
-  return move_repr_buffer;
-}
 
 void set_board(char *board) {
   memcpy(STATE.board, board, 8 * 8);
@@ -68,10 +56,9 @@ void initGameState() {
 
 int make_chess_move(Move move) {
 #ifndef UI_WORK
-  pipe_send_message(move_repr(move));
-  char* backend_msg = pipe_get_message();
-  if (backend_msg[0] != '0')
-    return backend_msg[0] - '0';
+  int backend_code = get_move_code(move);
+  if (!is_code_legal(backend_code))
+    return backend_code;
 #endif
   MovesDA *moves = &STATE.moves;
   assert(moves->capacity); // Capacity should be initialized elsewhere
@@ -85,7 +72,7 @@ int make_chess_move(Move move) {
   STATE.board[move.src.row][move.src.col] = '#';
   STATE.board[move.dst.row][move.dst.col] = piece;
   STATE.white_turn = !STATE.white_turn;
-  return 0;
+  return backend_code;
 }
 
 char get_piece_at(Cell cell) {

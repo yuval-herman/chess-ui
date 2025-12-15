@@ -1,12 +1,13 @@
 #include "definitions.h"
 #include "game.h"
+#include "main_layout.c"
+#include "protocol.h"
+#include "raylib.h"
 #include "stdio.h"
-#include <raylib.h>
+
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
 #include "clay_renderer_raylib.c"
-#include "main_layout.c"
-#include "communication.h"
 #include <string.h>
 
 UIData UI = {0};
@@ -40,31 +41,12 @@ void initUIData() {
   UI.colors.banner_background   = (Clay_Color){200, 125, 125, 175};
 }
 
-static bool cleanup_done = false;
-
-void cleanup() {
-  if (cleanup_done)
-    return;
-  cleanup_done = true;
-  pipe_close();
-}
-
 int main(void) {
 #ifndef UI_WORK
-  atexit(cleanup);
-
-  if (!pipe_init()) {
-    printf("Failed creating named pipe, exiting...");
-    exit(1);
+  if (!protocol_init()) {
+    protocol_close();
+    return 1;
   }
-
-  char* pipe_msg = pipe_get_message();
-  if (strlen(pipe_msg) != 65) {
-    printf("Got unexpected message, panicking\n");
-    exit(1);
-  }
-  set_board(pipe_msg);
-  set_whites_turn(pipe_msg[65]=='0');
 #endif
 
   Clay_Raylib_Initialize(1500, 800, "chess",
@@ -108,7 +90,7 @@ int main(void) {
     EndDrawing();
   }
 #ifndef UI_WORK
-  if (pipe_is_connected()) pipe_send_message("quit");
+  protocol_close();
 #endif
   Clay_Raylib_Close();
   return 0;

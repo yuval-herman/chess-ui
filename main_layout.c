@@ -1,6 +1,7 @@
 #include "clay.h"
 #include "definitions.h"
 #include "game.h"
+#include "protocol.h"
 #include "raylib.h"
 #include <assert.h>
 #include <string.h>
@@ -46,20 +47,7 @@ Texture2D* char2tex(char c) {
   }
 }
 
-const char* code2str(int code) {
-  switch (code) {
-  case 0: return "Valid move";
-  case 1: return "Chess";
-  case 2: return "Source cell is empty or the piece is not yours";
-  case 3: return "Destination cell is occupied by your own piece";
-  case 4: return "The move results in a chess";
-  case 5: return "Invalid source or dest position";
-  case 6: return "Piece cannot move that way";
-  case 7: return "Source and destination cells are the same";
-  case 8: return "Checkmate";
-  default: return "Error code invalid";
-  }
-}
+
 
 void handle_board_cell_hover(Clay_ElementId element_id,
                              Clay_PointerData pointer_data, void *user_data) {
@@ -72,7 +60,7 @@ void handle_board_cell_hover(Clay_ElementId element_id,
           .src = {UI_STATE.selected.row, UI_STATE.selected.col},
           .dst = {row, col},
       });
-      if (UI_STATE.backend_code != 0)
+      if (!is_code_legal(UI_STATE.backend_code))
         UI_STATE.banner_timeout = BANNER_TIMEOUT;
 
       UI_STATE.selected.col = -1;
@@ -104,7 +92,7 @@ void turn_indicator(bool is_white) {
 }
 
 void illegal_move_banner() {
-  if (UI_STATE.backend_code == 0 || UI_STATE.banner_timeout < 0)
+  if (is_code_legal(UI_STATE.backend_code) || UI_STATE.banner_timeout < 0)
     return;
   UI_STATE.banner_timeout--;
   CLAY(CLAY_ID("IllegalMoveBanner"), {
