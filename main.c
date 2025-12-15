@@ -16,18 +16,18 @@ void HandleClayErrors(Clay_ErrorData error_data) {
 }
 
 void initUIData() {
-  UI.textures.chess_pieces.b_bishop = LoadTexture("sprites/bd.png");
-  UI.textures.chess_pieces.w_bishop = LoadTexture("sprites/bl.png");
-  UI.textures.chess_pieces.b_king   = LoadTexture("sprites/kd.png");
-  UI.textures.chess_pieces.w_king   = LoadTexture("sprites/kl.png");
-  UI.textures.chess_pieces.b_knight = LoadTexture("sprites/nd.png");
-  UI.textures.chess_pieces.w_knight = LoadTexture("sprites/nl.png");
-  UI.textures.chess_pieces.b_pawn   = LoadTexture("sprites/pd.png");
-  UI.textures.chess_pieces.w_pawn   = LoadTexture("sprites/pl.png");
-  UI.textures.chess_pieces.b_queen  = LoadTexture("sprites/qd.png");
-  UI.textures.chess_pieces.w_queen  = LoadTexture("sprites/ql.png");
-  UI.textures.chess_pieces.b_rook   = LoadTexture("sprites/rd.png");
-  UI.textures.chess_pieces.w_rook   = LoadTexture("sprites/rl.png");
+  UI.textures.chess_pieces.b_bishop = LoadTexture("resources/sprites/bd.png");
+  UI.textures.chess_pieces.w_bishop = LoadTexture("resources/sprites/bl.png");
+  UI.textures.chess_pieces.b_king   = LoadTexture("resources/sprites/kd.png");
+  UI.textures.chess_pieces.w_king   = LoadTexture("resources/sprites/kl.png");
+  UI.textures.chess_pieces.b_knight = LoadTexture("resources/sprites/nd.png");
+  UI.textures.chess_pieces.w_knight = LoadTexture("resources/sprites/nl.png");
+  UI.textures.chess_pieces.b_pawn   = LoadTexture("resources/sprites/pd.png");
+  UI.textures.chess_pieces.w_pawn   = LoadTexture("resources/sprites/pl.png");
+  UI.textures.chess_pieces.b_queen  = LoadTexture("resources/sprites/qd.png");
+  UI.textures.chess_pieces.w_queen  = LoadTexture("resources/sprites/ql.png");
+  UI.textures.chess_pieces.b_rook   = LoadTexture("resources/sprites/rd.png");
+  UI.textures.chess_pieces.w_rook   = LoadTexture("resources/sprites/rl.png");
 
   UI.colors.background       = (Clay_Color){80, 80, 80, 255};
   UI.colors.light_background = (Clay_Color){150, 150, 150, 255};
