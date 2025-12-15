@@ -39,6 +39,7 @@ typedef struct {
 typedef struct {
   Cell src;
   Cell dst;
+  char piece_moved;
 } Move;
 
 extern UIData UI;

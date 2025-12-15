@@ -6,7 +6,12 @@
 #include <string.h>
 
 typedef struct {
-  Move *items;
+  Move move;
+  char piece;
+} PieceMove;
+
+typedef struct {
+  PieceMove *items;
   size_t count;
   size_t capacity;
 } MovesDA;
@@ -66,7 +71,7 @@ int make_chess_move(Move move) {
     moves->capacity *= 2;
     moves->items = realloc(moves->items, moves->capacity * sizeof(moves->items[0]));
   }
-  moves->items[moves->count++] = move;
+  moves->items[moves->count++] = (PieceMove){move, STATE.board[move.src.row][move.src.col]};
   // update board
   char piece = STATE.board[move.src.row][move.src.col];
   STATE.board[move.src.row][move.src.col] = '#';
@@ -85,16 +90,17 @@ char get_piece_at(Cell cell) {
   return STATE.board[cell.row][cell.col];
 }
 
-size_t get_moves_log(char moves_log[][6], size_t max_moves) {
+size_t get_moves_log(char moves_log[][MOVE_REPR_LENGTH], size_t max_moves) {
   max_moves = max_moves < STATE.moves.count ? max_moves : STATE.moves.count;
   for (size_t i = 0; i < max_moves; i++) {
-    char* move_repr_str = move_repr(STATE.moves.items[i]);
-    moves_log[i][0] = move_repr_str[0];
-    moves_log[i][1] = move_repr_str[1];
-    moves_log[i][2] = ',';
-    moves_log[i][3] = ' ';
-    moves_log[i][4] = move_repr_str[2];
-    moves_log[i][5] = move_repr_str[3];
+    char* move_repr_str = move_repr(STATE.moves.items[i].move);
+    moves_log[i][0] = STATE.moves.items[i].piece;
+    moves_log[i][1] = move_repr_str[0];
+    moves_log[i][2] = move_repr_str[1];
+    moves_log[i][3] = ',';
+    moves_log[i][4] = ' ';
+    moves_log[i][5] = move_repr_str[2];
+    moves_log[i][6] = move_repr_str[3];
   }
   return max_moves;
 }

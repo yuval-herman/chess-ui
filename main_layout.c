@@ -9,11 +9,11 @@
 
 // Average chess games have around 30-40 moves.
 // The moves log shows moves in this format:
-// "e2, b8" 6 chars
+// "pe2, b8" MOVE_REPR_LENGTH chars
 // I allow up to 200 moves per game, if you want longer games, adjust this accordingly.
 #define MAX_LOGS 200
 #define BANNER_TIMEOUT 120
-char move_log_buffer[MAX_LOGS][6];
+char move_log_buffer[MAX_LOGS][MOVE_REPR_LENGTH];
 
 typedef struct {
   Cell selected;
@@ -220,17 +220,29 @@ void main_layout() {
       ) {
         size_t move_count = get_moves_log(move_log_buffer, MAX_LOGS);
         for (size_t i = 0; i < move_count; i++) {
+          // For the actuall string we only show the second character onward, the first is the piece sign.
           Clay_String log_line = {.isStaticallyAllocated = true,
-                                  .length = 6,
-                                  .chars = move_log_buffer[i]};
+                                  .length = MOVE_REPR_LENGTH - 1,
+                                  .chars = move_log_buffer[i] + 1};
           CLAY(CLAY_IDI("MoveContainer", i), {
                .layout = {
                 .padding = CLAY_PADDING_ALL(8),
-                .sizing = {.width = CLAY_SIZING_GROW()}
+                .sizing = {.width = CLAY_SIZING_GROW()},
+                .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}
                 },
                .backgroundColor = UI.colors.board_background
              }) {
             CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+              CLAY(CLAY_IDI("LogLineIcon", i), {
+              .layout = {.sizing =
+                             {
+                                 .height = CLAY_SIZING_FIXED(30),
+                                 .width = CLAY_SIZING_FIXED(30),
+                             }},
+              .image = {.imageData = char2tex(move_log_buffer[i][0])},
+              .aspectRatio = {
+                1
+              }}) {}
           }
         }
       }
