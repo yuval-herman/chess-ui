@@ -19,7 +19,7 @@ bool protocol_init() {
     return false;
   }
   set_board(pipe_msg);
-  set_whites_turn(pipe_msg[65] == '0');
+  set_whites_turn(pipe_msg[64] == '0');
   return true;
 }
 
