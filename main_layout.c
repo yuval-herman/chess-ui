@@ -50,7 +50,7 @@ const char* code2str(int code) {
   switch (code) {
   case 0: return "Valid move";
   case 1: return "Chess";
-  case 2: return "Empty cell";
+  case 2: return "Source cell is empty or the piece is not yours";
   case 3: return "Destination cell is occupied by your own piece";
   case 4: return "The move results in a chess";
   case 5: return "Invalid source or dest position";
