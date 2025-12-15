@@ -4,6 +4,8 @@
 #include "protocol.h"
 #include "raylib.h"
 #include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 #include <time.h>
 
@@ -19,12 +21,14 @@ typedef struct {
   Cell selected;
   int backend_code; // last code received from the backend
   int banner_timeout;
+  bool move_log_hover;
 } UIState;
 
 UIState UI_STATE = {
     .selected = {-1, -1},
     .backend_code = -1,
     .banner_timeout = -1,
+    .move_log_hover = false,
 };
 
 // Returns a chess piece texture for the received char.
@@ -45,6 +49,15 @@ Texture2D* char2tex(char c) {
     case 'R': return &UI.textures.chess_pieces.w_rook;
     default: return NULL;
   }
+}
+
+void handle_moe_log_hover(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
+  (void)pointer_data;
+  (void)user_data;
+  // TODO: actually require clicking the log entry
+  // if(pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME)
+  UI_STATE.move_log_hover = true;
+  show_board_at(element_id.offset);
 }
 
 void handle_banner_hover(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
@@ -185,6 +198,7 @@ void board_layout() {
 }
 
 void main_layout() {
+  if(is_viewing_history() && !UI_STATE.move_log_hover) reset_board();
   CLAY(CLAY_ID("WindowContainer"), {
         .layout = {
           .sizing = {
@@ -237,8 +251,10 @@ void main_layout() {
                 .sizing = {.width = CLAY_SIZING_GROW()},
                 .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}
                 },
-               .backgroundColor = UI.colors.board_background
+               .backgroundColor = Clay_Hovered() ? UI.colors.highlighted_cell : UI.colors.board_background
              }) {
+            UI_STATE.move_log_hover = false;
+            Clay_OnHover(handle_moe_log_hover, NULL);
             CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
               CLAY(CLAY_IDI("LogLineIcon", i), {
               .layout = {.sizing =
