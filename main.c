@@ -36,7 +36,7 @@ void initUIData() {
   UI.colors.odd_cell         = (Clay_Color){125, 125, 125, 255};
   UI.colors.highlighted_cell = (Clay_Color){125, 125, 100, 255};
   UI.colors.turn_indicator   = (Clay_Color){125, 125, 100, 255};
-  UI.colors.banner_background   = (Clay_Color){125, 125, 125, 175};
+  UI.colors.banner_background   = (Clay_Color){200, 125, 125, 175};
 }
 
 static bool cleanup_done = false;
