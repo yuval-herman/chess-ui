@@ -7,7 +7,8 @@
 
 typedef struct {
   Move move;
-  char piece;
+  char src_piece;
+  char dst_piece;
 } PieceMove;
 
 typedef struct {
@@ -21,9 +22,14 @@ typedef struct {
   bool white_up; // Whether white is on the top of the board
   bool white_turn; // Whether it is currently White's turn
   MovesDA moves;
+  size_t showing_move;
 } GameState;
 
 GameState STATE = {0};
+
+bool is_viewing_history() {
+  return STATE.showing_move != STATE.moves.count;
+}
 
 void set_board(char *board) {
   memcpy(STATE.board, board, 8 * 8);
@@ -60,6 +66,7 @@ void initGameState() {
 }
 
 int make_chess_move(Move move) {
+  assert(!is_viewing_history());
 #ifndef UI_WORK
   int backend_code = get_move_code(move);
   if (!is_code_legal(backend_code))
@@ -71,7 +78,12 @@ int make_chess_move(Move move) {
     moves->capacity *= 2;
     moves->items = realloc(moves->items, moves->capacity * sizeof(moves->items[0]));
   }
-  moves->items[moves->count++] = (PieceMove){move, STATE.board[move.src.row][move.src.col]};
+  moves->items[moves->count++] = (PieceMove){
+      .move = move,
+      .src_piece = STATE.board[move.src.row][move.src.col],
+      .dst_piece = STATE.board[move.dst.row][move.dst.col],
+  };
+  STATE.showing_move = moves->count;
   // update board
   char piece = STATE.board[move.src.row][move.src.col];
   STATE.board[move.src.row][move.src.col] = '#';
@@ -94,7 +106,7 @@ size_t get_moves_log(char moves_log[][MOVE_REPR_LENGTH], size_t max_moves) {
   max_moves = max_moves < STATE.moves.count ? max_moves : STATE.moves.count;
   for (size_t i = 0; i < max_moves; i++) {
     char* move_repr_str = move_repr(STATE.moves.items[i].move);
-    moves_log[i][0] = STATE.moves.items[i].piece;
+    moves_log[i][0] = STATE.moves.items[i].src_piece;
     moves_log[i][1] = move_repr_str[0];
     moves_log[i][2] = move_repr_str[1];
     moves_log[i][3] = ',';
@@ -107,4 +119,32 @@ size_t get_moves_log(char moves_log[][MOVE_REPR_LENGTH], size_t max_moves) {
 
 size_t get_moves_count() {
   return STATE.moves.count;
+}
+
+void make_move_backward(PieceMove move) {
+  STATE.board[move.move.src.row][move.move.src.col] = move.src_piece;
+  STATE.board[move.move.dst.row][move.move.dst.col] = move.dst_piece;
+}
+
+void make_move_forwards(PieceMove move) {
+  if (move.dst_piece == '#')
+    STATE.board[move.move.src.row][move.move.src.col] = move.dst_piece;
+  else
+    STATE.board[move.move.src.row][move.move.src.col] = '#';
+  STATE.board[move.move.dst.row][move.move.dst.col] = move.src_piece;
+}
+
+void show_board_at(size_t move_index) {
+  assert(move_index < STATE.moves.count);
+  reset_board();
+  for (size_t i = STATE.moves.count; i > move_index; i--) {
+    make_move_backward(STATE.moves.items[i - 1]);
+    STATE.showing_move = i - 1;
+  }
+}
+
+void reset_board() {
+  for (; STATE.showing_move < STATE.moves.count; STATE.showing_move++) {
+    make_move_forwards(STATE.moves.items[STATE.showing_move]);
+  }
 }
