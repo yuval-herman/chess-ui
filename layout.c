@@ -197,6 +197,66 @@ void board_layout() {
   }
 }
 
+void info_panel() {
+  CLAY(CLAY_ID("InfoPanel"), {
+    .layout = {
+      .sizing = {
+        .width = CLAY_SIZING_GROW(50, 500),
+        .height = CLAY_SIZING_GROW(),
+      },
+      .layoutDirection = CLAY_TOP_TO_BOTTOM,
+      .padding = CLAY_PADDING_ALL(8)
+    },
+    .backgroundColor = UI.colors.board_background
+  }) {
+    CLAY_TEXT(CLAY_STRING("Move history:"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
+    CLAY(CLAY_ID("MoveHistoryPanel"), {
+        .layout = {
+          .sizing = {
+            .width = CLAY_SIZING_GROW(),
+            .height = CLAY_SIZING_GROW(),
+          },
+          .layoutDirection = CLAY_TOP_TO_BOTTOM,
+          .childGap = 8,
+          .padding = CLAY_PADDING_ALL(8)
+        },
+        .clip = {.vertical = true, .childOffset = Clay_GetScrollOffset()},
+        .backgroundColor = UI.colors.light_background
+      }
+    ) {
+      size_t move_count = get_moves_log(move_log_buffer, MAX_LOGS);
+      for (size_t i = 0; i < move_count; i++) {
+        // For the actuall string we only show the second character onward, the first is the piece sign.
+        Clay_String log_line = {.isStaticallyAllocated = true,
+                                .length = MOVE_REPR_LENGTH - 1,
+                                .chars = move_log_buffer[i] + 1};
+        CLAY(CLAY_IDI("MoveContainer", i), {
+             .layout = {
+              .padding = CLAY_PADDING_ALL(8),
+              .sizing = {.width = CLAY_SIZING_GROW()},
+              .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}
+              },
+             .backgroundColor = Clay_Hovered() ? UI.colors.highlighted_cell : UI.colors.board_background
+           }) {
+          UI_STATE.move_log_hover = false;
+          Clay_OnHover(handle_moe_log_hover, NULL);
+          CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+            CLAY(CLAY_IDI("LogLineIcon", i), {
+            .layout = {.sizing =
+                           {
+                               .height = CLAY_SIZING_FIXED(30),
+                               .width = CLAY_SIZING_FIXED(30),
+                           }},
+            .image = {.imageData = char2tex(move_log_buffer[i][0])},
+            .aspectRatio = {
+              1
+            }}) {}
+        }
+      }
+    }
+  }
+}
+
 void main_layout() {
   if(is_viewing_history() && !UI_STATE.move_log_hover) reset_board();
   CLAY(CLAY_ID("WindowContainer"), {
@@ -213,62 +273,6 @@ void main_layout() {
   }) {
     illegal_move_banner();
     board_layout();
-    CLAY(CLAY_ID("InfoPanel"), {
-      .layout = {
-        .sizing = {
-          .width = CLAY_SIZING_GROW(50, 500),
-          .height = CLAY_SIZING_GROW(),
-        },
-        .layoutDirection = CLAY_TOP_TO_BOTTOM,
-        .padding = CLAY_PADDING_ALL(8)
-      },
-      .backgroundColor = UI.colors.board_background
-    }) {
-      CLAY_TEXT(CLAY_STRING("Move history:"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
-      CLAY(CLAY_ID("MoveHistoryPanel"), {
-          .layout = {
-            .sizing = {
-              .width = CLAY_SIZING_GROW(),
-              .height = CLAY_SIZING_GROW(),
-            },
-            .layoutDirection = CLAY_TOP_TO_BOTTOM,
-            .childGap = 8,
-            .padding = CLAY_PADDING_ALL(8)
-          },
-          .clip = {.vertical = true, .childOffset = Clay_GetScrollOffset()},
-          .backgroundColor = UI.colors.light_background
-        }
-      ) {
-        size_t move_count = get_moves_log(move_log_buffer, MAX_LOGS);
-        for (size_t i = 0; i < move_count; i++) {
-          // For the actuall string we only show the second character onward, the first is the piece sign.
-          Clay_String log_line = {.isStaticallyAllocated = true,
-                                  .length = MOVE_REPR_LENGTH - 1,
-                                  .chars = move_log_buffer[i] + 1};
-          CLAY(CLAY_IDI("MoveContainer", i), {
-               .layout = {
-                .padding = CLAY_PADDING_ALL(8),
-                .sizing = {.width = CLAY_SIZING_GROW()},
-                .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}
-                },
-               .backgroundColor = Clay_Hovered() ? UI.colors.highlighted_cell : UI.colors.board_background
-             }) {
-            UI_STATE.move_log_hover = false;
-            Clay_OnHover(handle_moe_log_hover, NULL);
-            CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
-              CLAY(CLAY_IDI("LogLineIcon", i), {
-              .layout = {.sizing =
-                             {
-                                 .height = CLAY_SIZING_FIXED(30),
-                                 .width = CLAY_SIZING_FIXED(30),
-                             }},
-              .image = {.imageData = char2tex(move_log_buffer[i][0])},
-              .aspectRatio = {
-                1
-              }}) {}
-          }
-        }
-      }
-    }
+    info_panel();
   }
 }

@@ -1,6 +1,6 @@
 #include "definitions.h"
 #include "game.h"
-#include "main_layout.c"
+#include "layout.c"
 #include "protocol.h"
 #include "raylib.h"
 #include "stdio.h"
