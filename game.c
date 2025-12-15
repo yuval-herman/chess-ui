@@ -72,7 +72,11 @@ int make_chess_move(Move move) {
   STATE.board[move.src.row][move.src.col] = '#';
   STATE.board[move.dst.row][move.dst.col] = piece;
   STATE.white_turn = !STATE.white_turn;
+#ifndef UI_WORK
   return backend_code;
+#else
+  return 0;
+#endif
 }
 
 char get_piece_at(Cell cell) {

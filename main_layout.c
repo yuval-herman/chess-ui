@@ -214,6 +214,7 @@ void main_layout() {
             .childGap = 8,
             .padding = CLAY_PADDING_ALL(8)
           },
+          .clip = {.vertical = true, .childOffset = Clay_GetScrollOffset()},
           .backgroundColor = UI.colors.light_background
         }
       ) {
