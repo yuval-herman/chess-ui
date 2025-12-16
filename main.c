@@ -41,14 +41,25 @@ void initUIData() {
   UI.colors.banner_background   = (Clay_Color){200, 125, 125, 175};
 }
 
-int main(void) {
+bool wait_for_backend(Font message_font) {
+  BeginDrawing();
+  ClearBackground(BLACK);
+  const char *message = "Waiting for client connection";
+  const int font_size = 24;
+  Vector2 measurements = MeasureTextEx(message_font, message, font_size, 1);
+  DrawText(message, (GetScreenWidth() - measurements.x) / 2,
+           (GetScreenHeight() - measurements.y) / 2, font_size, RED);
+  EndDrawing();
 #ifndef UI_WORK
   if (!protocol_init()) {
     protocol_close();
-    return 1;
+    return false;
   }
 #endif
+  return true;
+}
 
+int main(void) {
   Clay_Raylib_Initialize(1500, 800, "chess",
                          FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT |
                              FLAG_VSYNC_HINT);
@@ -69,6 +80,7 @@ int main(void) {
   Clay_SetMeasureTextFunction(Raylib_MeasureText, fonts);
 
   // Clay_SetDebugModeEnabled(true);
+  if(wait_for_backend(fonts[0])) return 1;
 
   while (!WindowShouldClose()) {
     Clay_SetLayoutDimensions((Clay_Dimensions){.width = GetScreenWidth(),
