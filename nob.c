@@ -1,21 +1,25 @@
-#include "build_definitions.h"
+#ifdef _WIN32
+#define nob_cc(cmd) nob_cmd_append(cmd, "gcc")
+#else
+#define nob_cc(cmd) nob_cmd_append(cmd, "x86_64-w64-mingw32-gcc")
+#endif
+
 #define NOB_EXPERIMENTAL_DELETE_OLD
 #define NOB_IMPLEMENTATION
 #include "nob.h"
+#include "build_definitions.h"
 
 Nob_Cmd cmd = {0};
 
-// proffesional cross platform developer
-#define _WIN32
-
-#ifdef _WIN32
+// Until I make a new cross platform Pipe.h file, wine and mingw will do.
+// #ifdef _WIN32
 #define RAYLIB_LIB "raylib/windows/libraylib.a"
-#else
-#define RAYLIB_LIB "raylib/linux/libraylib.a"
-#endif
+// #else
+// #define RAYLIB_LIB "raylib/linux/libraylib.a"
+// #endif
 
 #define generator_append(output_file, format, ...)                             \
-  fprintf(output_file, format " /* generated in %s:%d */\n", ##__VA_ARGS__,        \
+  fprintf(output_file, format " /* generated in %s:%d */\n", ##__VA_ARGS__,    \
           __FILE__, __LINE__)
 
 // Appends file data as a c-array to given file.
@@ -64,7 +68,7 @@ bool embed_resources() {
 #define X(arr_name, img_name)                                                  \
   if (!pack_data(packed_file, arr_name, img_name))                             \
     return 1;
-    FONT_LIST
+  FONT_LIST
 #undef X
 
   generator_append(packed_file, "#endif // PACKED_FILE_H");
@@ -76,13 +80,12 @@ int main(int argc, char **argv) {
   NOB_GO_REBUILD_URSELF_PLUS(argc, argv, "build_definitions.h");
 
   nob_log(NOB_INFO, "packing resources into " PACKED_FILE);
-  if(!embed_resources()) {
+  if (!embed_resources()) {
     nob_log(NOB_ERROR, "failed generating " PACKED_FILE);
     return 1;
   }
-  
-  // nob_cc(&cmd);
-  nob_cmd_append(&cmd, "x86_64-w64-mingw32-gcc");
+
+  nob_cc(&cmd);
   nob_cc_flags(&cmd);
   nob_cc_output(&cmd, "main");
   nob_cmd_append(&cmd, "-g", "-O0");
@@ -94,12 +97,21 @@ int main(int argc, char **argv) {
   nob_cc_inputs(&cmd, "src/protocol.c");
   nob_cmd_append(&cmd, RAYLIB_LIB);
   nob_cmd_append(&cmd, "-lm");
-#ifdef _WIN32
+  // #ifdef _WIN32
   nob_cmd_append(&cmd, "-lopengl32", "-lgdi32", "-lwinmm", "-lshell32");
-#endif
+  // #endif
   // nob_cmd_append(&cmd, "-DUI_WORK");
 
   if (!nob_cmd_run(&cmd))
     return 1;
+
+  if (argc > 1) {
+#ifdef _WIN32
+    nob_cmd_append(&cmd, ".\\main.exe");
+#else
+    nob_cmd_append(&cmd, "wine", "main.exe");
+#endif
+    nob_cmd_run(&cmd);
+  }
   return 0;
 }
