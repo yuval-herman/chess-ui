@@ -67,10 +67,10 @@ void initUIData() {
   Image w_king = LoadImageFromMemory(".png", kl, kl_size);
   UI.textures.chess_pieces.w_king   = LoadTextureFromImage(w_king);
   UnloadImage(w_king);
-  Image b_knight = LoadImageFromMemory(".png", kd, kd_size);
+  Image b_knight = LoadImageFromMemory(".png", nd, nd_size);
   UI.textures.chess_pieces.b_knight = LoadTextureFromImage(b_knight);
   UnloadImage(b_knight);
-  Image w_knight = LoadImageFromMemory(".png", kl, kl_size);
+  Image w_knight = LoadImageFromMemory(".png", nl, nl_size);
   UI.textures.chess_pieces.w_knight = LoadTextureFromImage(w_knight);
   UnloadImage(w_knight);
   Image b_pawn = LoadImageFromMemory(".png", pd, pd_size);
