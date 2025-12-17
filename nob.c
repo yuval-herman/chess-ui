@@ -14,7 +14,7 @@ Nob_Cmd cmd = {0};
 #endif
 
 #define generator_append(output_file, format, ...)                             \
-  fprintf(output_file, format "// generated in %s:%d\n", ##__VA_ARGS__,        \
+  fprintf(output_file, format " /* generated in %s:%d */\n", ##__VA_ARGS__,        \
           __FILE__, __LINE__)
 
 // Appends file data as a c-array to given file.
@@ -48,6 +48,8 @@ bool embed_resources() {
     fprintf(stderr, "Couldn't open " PACKED_FILE " for writing\n");
     return false;
   }
+  generator_append(packed_file, "#ifndef PACKED_FILE_H");
+  generator_append(packed_file, "#define PACKED_FILE_H");
   generator_append(packed_file, "#include <stddef.h>");
 
   // Pack textures
@@ -64,12 +66,13 @@ bool embed_resources() {
     FONT_LIST
 #undef X
 
+  generator_append(packed_file, "#endif // PACKED_FILE_H");
   fclose(packed_file);
   return true;
 }
 
 int main(int argc, char **argv) {
-  NOB_GO_REBUILD_URSELF(argc, argv);
+  NOB_GO_REBUILD_URSELF_PLUS(argc, argv, "build_definitions.h");
 
   if(!embed_resources()) {
     nob_log(NOB_ERROR, "failed generating " PACKED_FILE);
