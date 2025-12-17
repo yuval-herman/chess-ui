@@ -32,14 +32,14 @@ void initUIData() {
   UI.textures.chess_pieces.b_rook   = LoadTexture("resources/sprites/rd.png");
   UI.textures.chess_pieces.w_rook   = LoadTexture("resources/sprites/rl.png");
 
-  UI.colors.background       = (Clay_Color){80, 80, 80, 255};
-  UI.colors.light_background = (Clay_Color){150, 150, 150, 255};
-  UI.colors.board_background = (Clay_Color){112, 112, 112, 255};
-  UI.colors.even_cell        = (Clay_Color){100, 100, 100, 255};
-  UI.colors.odd_cell         = (Clay_Color){125, 125, 125, 255};
-  UI.colors.highlighted_cell = (Clay_Color){125, 125, 100, 255};
-  UI.colors.turn_indicator   = (Clay_Color){125, 125, 100, 255};
-  UI.colors.banner_background   = (Clay_Color){200, 125, 125, 175};
+  UI.colors.background        = (Clay_Color){80, 80, 80, 255};
+  UI.colors.light_background  = (Clay_Color){150, 150, 150, 255};
+  UI.colors.board_background  = (Clay_Color){112, 112, 112, 255};
+  UI.colors.even_cell         = (Clay_Color){100, 100, 100, 255};
+  UI.colors.odd_cell          = (Clay_Color){125, 125, 125, 255};
+  UI.colors.highlighted_cell  = (Clay_Color){125, 125, 100, 255};
+  UI.colors.turn_indicator    = (Clay_Color){125, 125, 100, 255};
+  UI.colors.banner_background = (Clay_Color){200, 125, 125, 175};
 }
 
 bool wait_for_backend(Font message_font) {
@@ -60,7 +60,8 @@ bool wait_for_backend(Font message_font) {
              (GetScreenHeight() - measurements.y) / 2, font_size, RED);
     EndDrawing();
   }
-
+#else
+  (void)message_font;
 #endif
   return true;
 }

@@ -1,6 +1,6 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
-#include <raylib.h>
+#include "raylib.h"
 #include "clay.h"
 
 typedef struct {
