@@ -115,7 +115,7 @@ int main(void) {
       (Clay_Dimensions){.width = GetScreenWidth(), .height = GetScreenHeight()},
       (Clay_ErrorHandler){HandleClayErrors, NULL});
 
-  Font fonts[1] = {LoadFontEx("resources/fonts/Roboto-Regular.ttf", 60, NULL, 0)};
+  Font fonts[1] = {LoadFontFromMemory(".ttf", roboto, roboto_size, 60, NULL, 0)};
   Clay_SetMeasureTextFunction(Raylib_MeasureText, fonts);
 
   // Clay_SetDebugModeEnabled(true);

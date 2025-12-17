@@ -19,13 +19,11 @@ Nob_Cmd cmd = {0};
 
 // Appends file data as a c-array to given file.
 // Return true on success
-bool embed_image_data(FILE *output_file, char *arr_name, char *image_file) {
-  FILE *file = fopen(image_file, "rb");
+bool pack_data(FILE *output_file, char *arr_name, char *data_file) {
+  FILE *file = fopen(data_file, "rb");
   if (!file) {
-    fprintf(stderr, "Error opening file: %s\n", image_file);
-    fprintf(
-        stderr,
-        "Make sure all texture files exist within the resources directory.");
+    fprintf(stderr, "Error opening file: %s\n", data_file);
+    fprintf(stderr, "Make sure all resources exist!");
     return false;
   }
 
@@ -52,10 +50,18 @@ bool embed_resources() {
   }
   generator_append(packed_file, "#include <stddef.h>");
 
+  // Pack textures
 #define X(arr_name, img_name)                                                  \
-  if (!embed_image_data(packed_file, arr_name, img_name))                      \
+  if (!pack_data(packed_file, arr_name, img_name))                             \
     return 1;
   TEXTURE_LIST
+#undef X
+
+  // Pack fonts
+#define X(arr_name, img_name)                                                  \
+  if (!pack_data(packed_file, arr_name, img_name))                             \
+    return 1;
+    FONT_LIST
 #undef X
 
   fclose(packed_file);
@@ -85,7 +91,7 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
   nob_cmd_append(&cmd, "-lopengl32", "-lgdi32", "-lwinmm", "-lshell32");
 #endif
-  nob_cmd_append(&cmd, "-DUI_WORK");
+  // nob_cmd_append(&cmd, "-DUI_WORK");
 
   if (!nob_cmd_run(&cmd))
     return 1;
