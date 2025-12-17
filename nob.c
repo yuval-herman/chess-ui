@@ -1,4 +1,5 @@
 #include "build_definitions.h"
+#define NOB_EXPERIMENTAL_DELETE_OLD
 #define NOB_IMPLEMENTATION
 #include "nob.h"
 
@@ -74,6 +75,7 @@ bool embed_resources() {
 int main(int argc, char **argv) {
   NOB_GO_REBUILD_URSELF_PLUS(argc, argv, "build_definitions.h");
 
+  nob_log(NOB_INFO, "packing resources into " PACKED_FILE);
   if(!embed_resources()) {
     nob_log(NOB_ERROR, "failed generating " PACKED_FILE);
     return 1;
