@@ -1,7 +1,11 @@
+#include "build_definitions.h"
 #define NOB_IMPLEMENTATION
 #include "nob.h"
 
 Nob_Cmd cmd = {0};
+
+// proffesional cross platform developer
+#define _WIN32
 
 #ifdef _WIN32
 #define RAYLIB_LIB "raylib/windows/libraylib.a"
@@ -9,10 +13,65 @@ Nob_Cmd cmd = {0};
 #define RAYLIB_LIB "raylib/linux/libraylib.a"
 #endif
 
+#define generator_append(output_file, format, ...)                             \
+  fprintf(output_file, format "// generated in %s:%d\n", ##__VA_ARGS__,        \
+          __FILE__, __LINE__)
+
+// Appends file data as a c-array to given file.
+// Return true on success
+bool embed_image_data(FILE *output_file, char *arr_name, char *image_file) {
+  FILE *file = fopen(image_file, "rb");
+  if (!file) {
+    fprintf(stderr, "Error opening file: %s\n", image_file);
+    fprintf(
+        stderr,
+        "Make sure all texture files exist within the resources directory.");
+    return false;
+  }
+
+  generator_append(output_file, "const unsigned char %s[] = {", arr_name);
+  size_t count = 0;
+  int byte;
+  while ((byte = fgetc(file)) != EOF) {
+    fprintf(output_file, "0x%02X,", byte);
+    count++;
+  }
+  fseek(output_file, -1, SEEK_CUR);
+  generator_append(output_file, "};");
+  generator_append(output_file, "const size_t %s_size = %lu;", arr_name, count);
+
+  fclose(file);
+  return true;
+}
+
+bool embed_resources() {
+  FILE *packed_file = fopen(PACKED_FILE, "wb");
+  if (!packed_file) {
+    fprintf(stderr, "Couldn't open " PACKED_FILE " for writing\n");
+    return false;
+  }
+  generator_append(packed_file, "#include <stddef.h>");
+
+#define X(arr_name, img_name)                                                  \
+  if (!embed_image_data(packed_file, arr_name, img_name))                      \
+    return 1;
+  TEXTURE_LIST
+#undef X
+
+  fclose(packed_file);
+  return true;
+}
+
 int main(int argc, char **argv) {
   NOB_GO_REBUILD_URSELF(argc, argv);
 
-  nob_cc(&cmd);
+  if(!embed_resources()) {
+    nob_log(NOB_ERROR, "failed generating " PACKED_FILE);
+    return 1;
+  }
+  
+  // nob_cc(&cmd);
+  nob_cmd_append(&cmd, "x86_64-w64-mingw32-gcc");
   nob_cc_flags(&cmd);
   nob_cmd_append(&cmd, "-g", "-O0");
   nob_cmd_append(&cmd, "-Iraylib/include");
@@ -26,6 +85,7 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
   nob_cmd_append(&cmd, "-lopengl32", "-lgdi32", "-lwinmm", "-lshell32");
 #endif
+  nob_cmd_append(&cmd, "-DUI_WORK");
 
   if (!nob_cmd_run(&cmd))
     return 1;
