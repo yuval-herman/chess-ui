@@ -84,10 +84,10 @@ int main(int argc, char **argv) {
   // nob_cc(&cmd);
   nob_cmd_append(&cmd, "x86_64-w64-mingw32-gcc");
   nob_cc_flags(&cmd);
+  nob_cc_output(&cmd, "main");
   nob_cmd_append(&cmd, "-g", "-O0");
   nob_cmd_append(&cmd, "-Iraylib/include");
   nob_cmd_append(&cmd, "-Iexternal_includes");
-  nob_cc_output(&cmd, "src/main");
   nob_cc_inputs(&cmd, "src/main.c");
   nob_cc_inputs(&cmd, "src/game.c");
   nob_cc_inputs(&cmd, "src/communication.c");
