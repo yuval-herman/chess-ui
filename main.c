@@ -42,6 +42,7 @@ void initUIData() {
 }
 
 bool wait_for_backend(Font message_font) {
+#ifndef UI_WORK
   BeginDrawing();
   ClearBackground(BLACK);
   const char *message = "Waiting for client connection";
@@ -50,7 +51,6 @@ bool wait_for_backend(Font message_font) {
   DrawText(message, (GetScreenWidth() - measurements.x) / 2,
            (GetScreenHeight() - measurements.y) / 2, font_size, RED);
   EndDrawing();
-#ifndef UI_WORK
   if (!protocol_init()) {
     protocol_close();
     return false;
@@ -80,7 +80,7 @@ int main(void) {
   Clay_SetMeasureTextFunction(Raylib_MeasureText, fonts);
 
   // Clay_SetDebugModeEnabled(true);
-  if(wait_for_backend(fonts[0])) return 1;
+  if(!wait_for_backend(fonts[0])) return 1;
 
   while (!WindowShouldClose()) {
     Clay_SetLayoutDimensions((Clay_Dimensions){.width = GetScreenWidth(),
