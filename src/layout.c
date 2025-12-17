@@ -1,6 +1,7 @@
 #include "clay.h"
 #include "definitions.h"
 #include "game.h"
+#include "packed_files.h"
 #include "protocol.h"
 #include "raylib.h"
 #include <assert.h>
@@ -9,6 +10,41 @@
 #include <string.h>
 #include <time.h>
 
+typedef struct {
+  struct {
+    struct {
+      Texture2D w_king;
+      Texture2D w_queen;
+      Texture2D w_rook;
+      Texture2D w_bishop;
+      Texture2D w_knight;
+      Texture2D w_pawn;
+      Texture2D b_king;
+      Texture2D b_queen;
+      Texture2D b_rook;
+      Texture2D b_bishop;
+      Texture2D b_knight;
+      Texture2D b_pawn;
+    } chess_pieces;
+  } textures;
+  struct {
+      Clay_Color background;
+      Clay_Color board_background;
+      Clay_Color light_background;
+      Clay_Color even_cell;
+      Clay_Color odd_cell;
+      Clay_Color highlighted_cell;
+      Clay_Color turn_indicator;
+      Clay_Color banner_background;
+  } colors;
+  struct {
+    Cell selected;
+    int backend_code; // last code received from the backend
+    int banner_timeout;
+    bool move_log_hover;
+  } state;
+} UIData;
+
 // Average chess games have around 30-40 moves.
 // The moves log shows moves in this format:
 // "pe2, b8" MOVE_REPR_LENGTH chars
@@ -16,20 +52,60 @@
 #define MAX_LOGS 200
 #define BANNER_TIMEOUT 120
 char move_log_buffer[MAX_LOGS][MOVE_REPR_LENGTH];
+UIData UI = {0};
 
-typedef struct {
-  Cell selected;
-  int backend_code; // last code received from the backend
-  int banner_timeout;
-  bool move_log_hover;
-} UIState;
+void initUIData() {
+  Image b_bishop = LoadImageFromMemory(".png", bd, bd_size);
+  UI.textures.chess_pieces.b_bishop = LoadTextureFromImage(b_bishop);
+  UnloadImage(b_bishop);
+  Image w_bishop = LoadImageFromMemory(".png", bl, bl_size);
+  UI.textures.chess_pieces.w_bishop = LoadTextureFromImage(w_bishop);
+  UnloadImage(w_bishop);
+  Image b_king = LoadImageFromMemory(".png", kd, kd_size);
+  UI.textures.chess_pieces.b_king   = LoadTextureFromImage(b_king);
+  UnloadImage(b_king);
+  Image w_king = LoadImageFromMemory(".png", kl, kl_size);
+  UI.textures.chess_pieces.w_king   = LoadTextureFromImage(w_king);
+  UnloadImage(w_king);
+  Image b_knight = LoadImageFromMemory(".png", kd, kd_size);
+  UI.textures.chess_pieces.b_knight = LoadTextureFromImage(b_knight);
+  UnloadImage(b_knight);
+  Image w_knight = LoadImageFromMemory(".png", kl, kl_size);
+  UI.textures.chess_pieces.w_knight = LoadTextureFromImage(w_knight);
+  UnloadImage(w_knight);
+  Image b_pawn = LoadImageFromMemory(".png", pd, pd_size);
+  UI.textures.chess_pieces.b_pawn   = LoadTextureFromImage(b_pawn);
+  UnloadImage(b_pawn);
+  Image w_pawn = LoadImageFromMemory(".png", pl, pl_size);
+  UI.textures.chess_pieces.w_pawn   = LoadTextureFromImage(w_pawn);
+  UnloadImage(w_pawn);
+  Image b_queen = LoadImageFromMemory(".png", qd, qd_size);
+  UI.textures.chess_pieces.b_queen  = LoadTextureFromImage(b_queen);
+  UnloadImage(b_queen);
+  Image w_queen = LoadImageFromMemory(".png", ql, ql_size);
+  UI.textures.chess_pieces.w_queen  = LoadTextureFromImage(w_queen);
+  UnloadImage(w_queen);
+  Image b_rook = LoadImageFromMemory(".png", rd, rd_size);
+  UI.textures.chess_pieces.b_rook   = LoadTextureFromImage(b_rook);
+  UnloadImage(b_rook);
+  Image w_rook = LoadImageFromMemory(".png", rl, rl_size);
+  UI.textures.chess_pieces.w_rook   = LoadTextureFromImage(w_rook);
+  UnloadImage(w_rook);
 
-UIState UI_STATE = {
-    .selected = {-1, -1},
-    .backend_code = -1,
-    .banner_timeout = -1,
-    .move_log_hover = false,
-};
+  UI.colors.background        = (Clay_Color){80, 80, 80, 255};
+  UI.colors.light_background  = (Clay_Color){150, 150, 150, 255};
+  UI.colors.board_background  = (Clay_Color){112, 112, 112, 255};
+  UI.colors.even_cell         = (Clay_Color){100, 100, 100, 255};
+  UI.colors.odd_cell          = (Clay_Color){125, 125, 125, 255};
+  UI.colors.highlighted_cell  = (Clay_Color){125, 125, 100, 255};
+  UI.colors.turn_indicator    = (Clay_Color){125, 125, 100, 255};
+  UI.colors.banner_background = (Clay_Color){200, 125, 125, 175};
+
+  UI.state.selected       = (Cell){-1, -1};
+  UI.state.backend_code   = -1;
+  UI.state.banner_timeout = -1;
+  UI.state.move_log_hover = false;
+}
 
 // Returns a chess piece texture for the received char.
 // Returns white variant for white==true, black otherwise.
@@ -56,7 +132,7 @@ void handle_moe_log_hover(Clay_ElementId element_id, Clay_PointerData pointer_da
   (void)user_data;
   // TODO: actually require clicking the log entry
   // if(pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME)
-  UI_STATE.move_log_hover = true;
+  UI.state.move_log_hover = true;
   show_board_at(element_id.offset);
 }
 
@@ -64,7 +140,7 @@ void handle_banner_hover(Clay_ElementId element_id, Clay_PointerData pointer_dat
   (void)element_id;
   (void)user_data;
   if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-    UI_STATE.banner_timeout = -1;
+    UI.state.banner_timeout = -1;
   }
 }
 
@@ -74,19 +150,19 @@ void handle_board_cell_hover(Clay_ElementId element_id,
   if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
     int col = element_id.offset % 8;
     int row = (element_id.offset - col) / 8;
-    if (UI_STATE.selected.col >= 0) {
-      UI_STATE.backend_code = make_chess_move((Move){
-          .src = {UI_STATE.selected.row, UI_STATE.selected.col},
+    if (UI.state.selected.col >= 0) {
+      UI.state.backend_code = make_chess_move((Move){
+          .src = {UI.state.selected.row, UI.state.selected.col},
           .dst = {row, col},
       });
-      if (!is_code_legal(UI_STATE.backend_code))
-        UI_STATE.banner_timeout = BANNER_TIMEOUT;
+      if (!is_code_legal(UI.state.backend_code))
+        UI.state.banner_timeout = BANNER_TIMEOUT;
 
-      UI_STATE.selected.col = -1;
-      UI_STATE.selected.row = -1;
+      UI.state.selected.col = -1;
+      UI.state.selected.row = -1;
     } else {
-      UI_STATE.selected.col = col;
-      UI_STATE.selected.row = row;
+      UI.state.selected.col = col;
+      UI.state.selected.row = row;
     }
   }
 }
@@ -111,9 +187,9 @@ void turn_indicator(bool is_white) {
 }
 
 void illegal_move_banner() {
-  if (is_code_legal(UI_STATE.backend_code) || UI_STATE.banner_timeout < 0)
+  if (is_code_legal(UI.state.backend_code) || UI.state.banner_timeout < 0)
     return;
-  UI_STATE.banner_timeout--;
+  UI.state.banner_timeout--;
   CLAY(CLAY_ID("IllegalMoveBanner"), {
        .layout = {
          .sizing = {
@@ -126,7 +202,7 @@ void illegal_move_banner() {
       .floating = {.attachTo = CLAY_ATTACH_TO_PARENT}
      }) {
     Clay_OnHover(handle_banner_hover, NULL);
-    const char *message = code2str(UI_STATE.backend_code);
+    const char *message = code2str(UI.state.backend_code);
     Clay_String clay_str = {
         .isStaticallyAllocated = true,
         .chars = message,
@@ -166,7 +242,7 @@ void board_layout() {
         }) {
         for (int col = 0; col < 8; col++) {
           Clay_Color cell_color = (row + col) % 2 ? UI.colors.odd_cell : UI.colors.even_cell;
-          bool cell_selected = row == UI_STATE.selected.row && col == UI_STATE.selected.col;
+          bool cell_selected = row == UI.state.selected.row && col == UI.state.selected.col;
           CLAY(CLAY_IDI("cell", col + row * 8),{
                 .layout = {
                   .sizing = {
@@ -238,7 +314,7 @@ void info_panel() {
               },
              .backgroundColor = Clay_Hovered() ? UI.colors.highlighted_cell : UI.colors.board_background
            }) {
-          UI_STATE.move_log_hover = false;
+          UI.state.move_log_hover = false;
           Clay_OnHover(handle_moe_log_hover, NULL);
           CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
             CLAY(CLAY_IDI("LogLineIcon", i), {
@@ -258,7 +334,7 @@ void info_panel() {
 }
 
 void main_layout() {
-  if(is_viewing_history() && !UI_STATE.move_log_hover) reset_board();
+  if(is_viewing_history() && !UI.state.move_log_hover) reset_board();
   CLAY(CLAY_ID("WindowContainer"), {
         .layout = {
           .sizing = {

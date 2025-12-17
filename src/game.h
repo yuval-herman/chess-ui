@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 #include "definitions.h"
+#include <stdbool.h>
+#include <stddef.h>
 
 #define MOVE_REPR_LENGTH 7
 

@@ -1,4 +1,3 @@
-#include "definitions.h"
 #include "game.h"
 #include "layout.c"
 #include "protocol.h"
@@ -12,59 +11,9 @@
 #include "clay_renderer_raylib.c"
 #include <string.h>
 
-UIData UI = {0};
-
 void HandleClayErrors(Clay_ErrorData error_data) {
   printf("CLAY ERROR: %s\n", error_data.errorText.chars);
   exit(1);
-}
-
-void initUIData() {
-  Image b_bishop = LoadImageFromMemory(".png", bd, bd_size);
-  UI.textures.chess_pieces.b_bishop = LoadTextureFromImage(b_bishop);
-  UnloadImage(b_bishop);
-  Image w_bishop = LoadImageFromMemory(".png", bl, bl_size);
-  UI.textures.chess_pieces.w_bishop = LoadTextureFromImage(w_bishop);
-  UnloadImage(w_bishop);
-  Image b_king = LoadImageFromMemory(".png", kd, kd_size);
-  UI.textures.chess_pieces.b_king   = LoadTextureFromImage(b_king);
-  UnloadImage(b_king);
-  Image w_king = LoadImageFromMemory(".png", kl, kl_size);
-  UI.textures.chess_pieces.w_king   = LoadTextureFromImage(w_king);
-  UnloadImage(w_king);
-  Image b_knight = LoadImageFromMemory(".png", kd, kd_size);
-  UI.textures.chess_pieces.b_knight = LoadTextureFromImage(b_knight);
-  UnloadImage(b_knight);
-  Image w_knight = LoadImageFromMemory(".png", kl, kl_size);
-  UI.textures.chess_pieces.w_knight = LoadTextureFromImage(w_knight);
-  UnloadImage(w_knight);
-  Image b_pawn = LoadImageFromMemory(".png", pd, pd_size);
-  UI.textures.chess_pieces.b_pawn   = LoadTextureFromImage(b_pawn);
-  UnloadImage(b_pawn);
-  Image w_pawn = LoadImageFromMemory(".png", pl, pl_size);
-  UI.textures.chess_pieces.w_pawn   = LoadTextureFromImage(w_pawn);
-  UnloadImage(w_pawn);
-  Image b_queen = LoadImageFromMemory(".png", qd, qd_size);
-  UI.textures.chess_pieces.b_queen  = LoadTextureFromImage(b_queen);
-  UnloadImage(b_queen);
-  Image w_queen = LoadImageFromMemory(".png", ql, ql_size);
-  UI.textures.chess_pieces.w_queen  = LoadTextureFromImage(w_queen);
-  UnloadImage(w_queen);
-  Image b_rook = LoadImageFromMemory(".png", rd, rd_size);
-  UI.textures.chess_pieces.b_rook   = LoadTextureFromImage(b_rook);
-  UnloadImage(b_rook);
-  Image w_rook = LoadImageFromMemory(".png", rl, rl_size);
-  UI.textures.chess_pieces.w_rook   = LoadTextureFromImage(w_rook);
-  UnloadImage(w_rook);
-
-  UI.colors.background        = (Clay_Color){80, 80, 80, 255};
-  UI.colors.light_background  = (Clay_Color){150, 150, 150, 255};
-  UI.colors.board_background  = (Clay_Color){112, 112, 112, 255};
-  UI.colors.even_cell         = (Clay_Color){100, 100, 100, 255};
-  UI.colors.odd_cell          = (Clay_Color){125, 125, 125, 255};
-  UI.colors.highlighted_cell  = (Clay_Color){125, 125, 100, 255};
-  UI.colors.turn_indicator    = (Clay_Color){125, 125, 100, 255};
-  UI.colors.banner_background = (Clay_Color){200, 125, 125, 175};
 }
 
 bool wait_for_backend(Font message_font) {
