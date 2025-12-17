@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 bool protocol_init();
+bool protocol_has_started();
 void protocol_close();
 const char* code2str(int code);
 bool is_code_legal(int code);

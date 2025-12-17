@@ -4,6 +4,7 @@
 #include "protocol.h"
 #include "raylib.h"
 #include "stdio.h"
+#include <stdlib.h>
 
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
@@ -43,20 +44,32 @@ void initUIData() {
 
 bool wait_for_backend(Font message_font) {
 #ifndef UI_WORK
-  BeginDrawing();
-  ClearBackground(BLACK);
-  const char *message = "Waiting for client connection";
-  const int font_size = 24;
-  Vector2 measurements = MeasureTextEx(message_font, message, font_size, 1);
-  DrawText(message, (GetScreenWidth() - measurements.x) / 2,
-           (GetScreenHeight() - measurements.y) / 2, font_size, RED);
-  EndDrawing();
+  // first attempt pipe connection
   if (!protocol_init()) {
     protocol_close();
     return false;
   }
+
+  while (!WindowShouldClose() && !protocol_has_started()) {
+    BeginDrawing();
+    ClearBackground(BLACK);
+    const char *message = "Waiting for client connection";
+    const int font_size = 24;
+    Vector2 measurements = MeasureTextEx(message_font, message, font_size, 1);
+    DrawText(message, (GetScreenWidth() - measurements.x) / 2,
+             (GetScreenHeight() - measurements.y) / 2, font_size, RED);
+    EndDrawing();
+  }
+
 #endif
   return true;
+}
+
+void clean_resources() {
+#ifndef UI_WORK
+  protocol_close();
+#endif
+  Clay_Raylib_Close();
 }
 
 int main(void) {
@@ -80,7 +93,10 @@ int main(void) {
   Clay_SetMeasureTextFunction(Raylib_MeasureText, fonts);
 
   // Clay_SetDebugModeEnabled(true);
-  if(!wait_for_backend(fonts[0])) return 1;
+  if(!wait_for_backend(fonts[0])) {
+    clean_resources();
+    return 1;
+  }
 
   while (!WindowShouldClose()) {
     Clay_SetLayoutDimensions((Clay_Dimensions){.width = GetScreenWidth(),
@@ -101,9 +117,6 @@ int main(void) {
     Clay_Raylib_Render(renderCommands, fonts);
     EndDrawing();
   }
-#ifndef UI_WORK
-  protocol_close();
-#endif
-  Clay_Raylib_Close();
+  clean_resources();
   return 0;
 }

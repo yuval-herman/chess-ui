@@ -2,7 +2,6 @@
 #include "communication.h"
 #include "game.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 char move_repr_buffer[4];
@@ -10,9 +9,13 @@ char move_repr_buffer[4];
 bool protocol_init() {
   if (!pipe_init()) {
     printf("Failed creating named pipe, exiting...");
-    exit(1);
+    return false;
   }
+  return true;
+}
 
+bool protocol_has_started() {
+  if(!pipe_is_connected() || !pipe_has_new_message()) return false;
   char *pipe_msg = pipe_get_message();
   if (strlen(pipe_msg) != 65) {
     printf("Got unexpected message: %s\n", pipe_msg);
