@@ -19,6 +19,9 @@ char get_piece_at(Cell cell);
 size_t get_moves_log(char moves_log[][MOVE_REPR_LENGTH], size_t max_moves);
 size_t get_moves_count();
 
+size_t get_white_count();
+size_t get_black_count();
+
 // This will overwrite the board state (returned from `get_piece_at`) and set the board immutable.
 // To return to the current board and continue playing, call `reset_board`.
 void show_board_at(size_t move_index);

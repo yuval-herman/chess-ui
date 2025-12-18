@@ -149,3 +149,19 @@ void reset_board() {
     make_move_forwards(STATE.moves.items[STATE.showing_move]);
   }
 }
+
+size_t get_white_count() {
+  size_t count = 0;
+  for (size_t i = 0; i < 8 * 8; i++)
+    if (islower(((char *)STATE.board)[i]))
+      count++;
+  return count;
+}
+
+size_t get_black_count() {
+  size_t count = 0;
+  for (size_t i = 0; i < 8 * 8; i++)
+    if (isupper(((char *)STATE.board)[i]))
+      count++;
+  return count;
+}

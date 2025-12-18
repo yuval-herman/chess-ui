@@ -274,6 +274,7 @@ void board_layout() {
 }
 
 void info_panel() {
+  static char* piece_count_buffer[6];
   CLAY(CLAY_ID("InfoPanel"), {
     .layout = {
       .sizing = {
@@ -285,6 +286,37 @@ void info_panel() {
     },
     .backgroundColor = UI.colors.board_background
   }) {
+      CLAY(CLAY_ID("PieceCountsContainer"),
+           {.layout = {.padding = CLAY_PADDING_ALL(8),
+                       .sizing = {.width = CLAY_SIZING_GROW()},
+                       .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}},
+            .backgroundColor = Clay_Hovered() ? UI.colors.highlighted_cell
+                                              : UI.colors.board_background}) {
+        CLAY(CLAY_ID("BlackPieceIcon"),
+             {.layout = {.sizing =
+                             {
+                                 .height = CLAY_SIZING_FIXED(30),
+                                 .width = CLAY_SIZING_FIXED(30),
+                             }},
+              .image = {.imageData = &UI.textures.chess_pieces.b_pawn},
+              .aspectRatio = {1}}) {}
+        char* t_buffer = (char*)piece_count_buffer;
+        snprintf(t_buffer, 3, "%zu", get_white_count());
+        Clay_String white_count_str = {.length = 2, .isStaticallyAllocated = true, .chars = t_buffer};
+        CLAY_TEXT(white_count_str, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+        CLAY(CLAY_ID("WhitePieceIcon"),
+             {.layout = {.sizing =
+                             {
+                                 .height = CLAY_SIZING_FIXED(30),
+                                 .width = CLAY_SIZING_FIXED(30),
+                             }},
+              .image = {.imageData = &UI.textures.chess_pieces.w_pawn},
+              .aspectRatio = {1}}) {}
+        t_buffer = (char *)piece_count_buffer + 3;
+        snprintf(t_buffer, 3, "%zu", get_black_count());
+        Clay_String black_count_str = {.length = 2, .isStaticallyAllocated = true, .chars = t_buffer};
+        CLAY_TEXT(black_count_str, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
+        }
     CLAY_TEXT(CLAY_STRING("Move history:"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
     CLAY(CLAY_ID("MoveHistoryPanel"), {
         .layout = {
