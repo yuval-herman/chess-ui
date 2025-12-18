@@ -37,7 +37,7 @@ void set_board(char *board) {
   int white_count = 0;
   int black_count = 0;
   for (int i = 0; i<8*4; i++) {
-    if(isupper(board[i])) white_count++;
+    if(is_piece_white(board[i])) white_count++;
     else black_count++;
   }
   STATE.white_up = white_count >= black_count;
@@ -152,16 +152,20 @@ void reset_board() {
 
 size_t get_white_count() {
   size_t count = 0;
-  for (size_t i = 0; i < 8 * 8; i++)
-    if (islower(((char *)STATE.board)[i]))
+  for (size_t i = 0; i < 8 * 8; i++) {
+    char piece = ((char *)STATE.board)[i];
+    if (piece != '#' && is_piece_white(piece))
       count++;
+  }
   return count;
 }
 
 size_t get_black_count() {
   size_t count = 0;
-  for (size_t i = 0; i < 8 * 8; i++)
-    if (isupper(((char *)STATE.board)[i]))
+  for (size_t i = 0; i < 8 * 8; i++) {
+    char piece = ((char *)STATE.board)[i];
+    if (piece != '#' && !is_piece_white(piece))
       count++;
+  }
   return count;
 }

@@ -2,6 +2,7 @@
 #include "communication.h"
 #include "definitions.h"
 #include "game.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -66,3 +67,8 @@ char *move_repr(Move move) {
   move_repr_buffer[3] = 7 - move.dst.row + '1';
   return move_repr_buffer;
 }
+
+bool is_piece_white(char piece) {
+  return isupper(piece);
+}
+

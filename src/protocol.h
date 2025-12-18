@@ -12,5 +12,6 @@ int get_move_code(Move move);
 // Returns a move represantation the client can understand. Every call
 // overwrites the previous one.
 char *move_repr(Move move);
+bool is_piece_white(char piece);
 
 #endif // PROTOCOL_H

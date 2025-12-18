@@ -12,7 +12,7 @@ typedef enum {
   MOVE_STATIONARY,
   MOVE_CHECKMATE,
   MOVE_ERROR_UNKNOWN,
-} MOVE_CODES;
+} Move_Codes;
 
 typedef struct {
   int row, col;
