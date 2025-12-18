@@ -1,5 +1,6 @@
 #include "protocol.h"
 #include "communication.h"
+#include "definitions.h"
 #include "game.h"
 #include <stdio.h>
 #include <string.h>
@@ -35,21 +36,21 @@ void protocol_close() {
 
 const char* code2str(int code) {
   switch (code) {
-  case 0: return "Valid move";
-  case 1: return "Chess";
-  case 2: return "Source cell is empty or the piece is not yours";
-  case 3: return "Destination cell is occupied by your own piece";
-  case 4: return "The move results in a chess";
-  case 5: return "Invalid source or dest position";
-  case 6: return "Piece cannot move that way";
-  case 7: return "Source and destination cells are the same";
-  case 8: return "Checkmate";
+  case MOVE_VALID : return "Valid move";
+  case MOVE_CHECK: return "Check";
+  case MOVE_INVALID_SOURCE: return "Source cell empty or wrong color";
+  case MOVE_FRIENDLY_FIRE: return "Destination cell is occupied by your own piece";
+  case MOVE_LEAVES_KING_EXPOSED: return "The move results in a check against yourself";
+  case MOVE_OUT_OF_BOUNDS: return "Invalid source or dest position";
+  case MOVE_ILLEGAL_PATTERN: return "Piece cannot move that way";
+  case MOVE_STATIONARY: return "Source and destination cells are the same";
+  case MOVE_CHECKMATE: return "Checkmate";
   default: return "Error code invalid";
   }
 }
 
 bool is_code_legal(int code) {
-  return code == 0 || code == 1 || code == 8;
+  return code == MOVE_VALID || code == MOVE_CHECK || code == MOVE_CHECKMATE;
 }
 
 int get_move_code(Move move) {
