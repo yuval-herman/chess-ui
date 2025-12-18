@@ -1,6 +1,7 @@
 #include "game.h"
 #include "definitions.h"
 #include "protocol.h"
+#include "rules.h"
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
@@ -68,7 +69,11 @@ void initGameState() {
 
 int make_chess_move(Move move) {
   assert(!is_viewing_history());
-#ifndef UI_WORK
+#ifdef UI_WORK
+  int backend_code = is_move_legal(move);
+  if (!is_code_legal(backend_code))
+    return backend_code;
+#else
   int backend_code = get_move_code(move);
   if (!is_code_legal(backend_code))
     return backend_code;

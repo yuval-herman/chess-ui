@@ -95,6 +95,7 @@ int main(int argc, char **argv) {
   nob_cc_inputs(&cmd, "src/game.c");
   nob_cc_inputs(&cmd, "src/communication.c");
   nob_cc_inputs(&cmd, "src/protocol.c");
+  nob_cc_inputs(&cmd, "src/rules.c");
   nob_cmd_append(&cmd, RAYLIB_LIB);
   nob_cmd_append(&cmd, "-lm");
   // #ifdef _WIN32

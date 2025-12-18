@@ -151,9 +151,11 @@ void handle_board_cell_hover(Clay_ElementId element_id,
     int col = element_id.offset % 8;
     int row = (element_id.offset - col) / 8;
     if (UI.state.selected.col >= 0) {
+      Cell selected_cell = {UI.state.selected.row, UI.state.selected.col};
       UI.state.backend_code = make_chess_move((Move){
-          .src = {UI.state.selected.row, UI.state.selected.col},
+          .src = selected_cell,
           .dst = {row, col},
+          .piece_moved = get_piece_at(selected_cell),
       });
       if (!is_code_legal(UI.state.backend_code))
         UI.state.banner_timeout = BANNER_TIMEOUT;
