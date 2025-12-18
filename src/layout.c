@@ -290,8 +290,7 @@ void info_panel() {
            {.layout = {.padding = CLAY_PADDING_ALL(8),
                        .sizing = {.width = CLAY_SIZING_GROW()},
                        .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}},
-            .backgroundColor = Clay_Hovered() ? UI.colors.highlighted_cell
-                                              : UI.colors.board_background}) {
+            }) {
         CLAY(CLAY_ID("BlackPieceIcon"),
              {.layout = {.sizing =
                              {
