@@ -42,7 +42,7 @@ const char* code2str(int code) {
   case MOVE_INVALID_SOURCE: return "Source cell empty or wrong color";
   case MOVE_FRIENDLY_FIRE: return "Destination cell is occupied by your own piece";
   case MOVE_LEAVES_KING_EXPOSED: return "The move results in a check against yourself";
-  case MOVE_OUT_OF_BOUNDS: return "Invalid source or dest position";
+  case MOVE_OUT_OF_BOUNDS: return "Tried moving out of bounds";
   case MOVE_ILLEGAL_PATTERN: return "Piece cannot move that way";
   case MOVE_STATIONARY: return "Source and destination cells are the same";
   case MOVE_CHECKMATE: return "Checkmate";
