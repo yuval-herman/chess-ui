@@ -1,5 +1,6 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
+#include <stdio.h>
 
 typedef enum {
   MOVE_VALID = 0,
@@ -23,5 +24,7 @@ typedef struct {
   Cell dst;
   char piece_moved;
 } Move;
+
+#define debug_print(fmt, ...) fprintf(stderr, fmt " %s:%d\n", ##__VA_ARGS__, __FILE__, __LINE__)
 
 #endif // DEFINITIONS_H

@@ -12,7 +12,7 @@
 #include <string.h>
 
 void HandleClayErrors(Clay_ErrorData error_data) {
-  printf("CLAY ERROR: %s\n", error_data.errorText.chars);
+  fprintf(stderr, "CLAY ERROR: %s\n", error_data.errorText.chars);
   exit(1);
 }
 

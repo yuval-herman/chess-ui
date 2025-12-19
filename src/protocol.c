@@ -10,7 +10,7 @@ char move_repr_buffer[4];
 
 bool protocol_init() {
   if (!pipe_init()) {
-    printf("Failed creating named pipe, exiting...");
+    fprintf(stderr, "Failed creating named pipe, exiting...");
     return false;
   }
   return true;
@@ -20,7 +20,7 @@ bool protocol_has_started() {
   if(!pipe_is_connected() || !pipe_has_new_message()) return false;
   char *pipe_msg = pipe_get_message();
   if (strlen(pipe_msg) != 65) {
-    printf("Got unexpected message: %s\n", pipe_msg);
+    fprintf(stderr, "Got unexpected message: %s\n", pipe_msg);
     return false;
   }
   set_board(pipe_msg);
