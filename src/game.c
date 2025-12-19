@@ -1,10 +1,13 @@
 #include "game.h"
 #include "definitions.h"
 #include "protocol.h"
-#include "rules.h"
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+
+#ifdef UI_WORK
+#include "rules.h"
+#endif
 
 typedef struct {
   Move move;
