@@ -102,6 +102,7 @@ int main(int argc, char **argv) {
   nob_cmd_append(&cmd, "-lopengl32", "-lgdi32", "-lwinmm", "-lshell32");
   // #endif
   // nob_cmd_append(&cmd, "-DUI_WORK");
+  nob_cmd_append(&cmd, "-DTESTER_MODE");
 
   if (!nob_cmd_run(&cmd))
     return 1;
@@ -112,7 +113,12 @@ int main(int argc, char **argv) {
 #else
     nob_cmd_append(&cmd, "wine", "main.exe");
 #endif
-    nob_cmd_run(&cmd);
+    Nob_Procs procs = {0};
+    nob_cmd_run(&cmd, .async = &procs);
+    // nob_cmd_append(&cmd, "wine", "backend/main.exe");
+    // sleep(4);
+    // nob_cmd_run(&cmd, .async = &procs);
+    nob_procs_flush(&procs);
   }
   return 0;
 }

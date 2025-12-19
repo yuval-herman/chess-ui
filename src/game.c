@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef UI_WORK
+#ifdef TESTER_MODE
 #include "rules.h"
 #endif
 
@@ -13,6 +13,8 @@ typedef struct {
   Move move;
   char src_piece;
   char dst_piece;
+  int backend_code;
+  int inner_tester_code;
 } PieceMove;
 
 typedef struct {
@@ -72,11 +74,11 @@ void initGameState() {
 
 int make_chess_move(Move move) {
   assert(!is_viewing_history());
-#ifdef UI_WORK
-  int backend_code = is_move_legal(move);
+#ifdef TESTER_MODE
+  int backend_code = get_move_code(move);
   if (!is_code_legal(backend_code))
     return backend_code;
-#else
+#elif !defined (UI_WORK)
   int backend_code = get_move_code(move);
   if (!is_code_legal(backend_code))
     return backend_code;
@@ -91,6 +93,16 @@ int make_chess_move(Move move) {
       .move = move,
       .src_piece = STATE.board[move.src.row][move.src.col],
       .dst_piece = STATE.board[move.dst.row][move.dst.col],
+#ifdef UI_WORK             // in UI work mode everything is legal
+      .backend_code = 0,
+      .inner_tester_code = 0,
+#elif defined(TESTER_MODE) // tester mode needs to report issues
+      .backend_code = backend_code,
+      .inner_tester_code = is_move_legal(move),
+#else                      // normal operation mode fully depends on the backend
+      .backend_code = backend_code,
+      .inner_tester_code = backend_code,
+#endif
   };
   STATE.showing_move = moves->count;
   // update board
