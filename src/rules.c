@@ -15,6 +15,13 @@ bool is_move_stationary(Move move) {
   return move.src.col == move.dst.col && move.src.row == move.dst.row;
 }
 
+// Helper macro for is_way_free
+#define check_piece                                                            \
+  char piece = get_piece_at(cur);                                              \
+  debug_print("Checking piece: %c", piece);                                    \
+  if (piece != '#')                                                            \
+    return false;
+
 // Check if all the cell are empty from src to dst, excluding src and dst
 // themselves
 bool is_way_free(Cell src, Cell dst) {
@@ -26,10 +33,7 @@ bool is_way_free(Cell src, Cell dst) {
     int end_col = max(src.col,dst.col);
 
     for (cur.col++; cur.col < end_col; cur.col++) {
-      char piece = get_piece_at(cur);
-      debug_print("Checking piece: %c", piece);
-      if (piece != '#')
-        return false;
+      check_piece
     }
     return true;
   }
@@ -40,10 +44,7 @@ bool is_way_free(Cell src, Cell dst) {
     int end_row = max(src.row,dst.row);
 
     for (cur.row++; cur.row < end_row; cur.row++) {
-      char piece = get_piece_at(cur);
-      debug_print("Checking piece: %c", piece);
-      if (piece != '#')
-        return false;
+      check_piece
     }
     return true;
   }
@@ -54,10 +55,7 @@ bool is_way_free(Cell src, Cell dst) {
     int end_col = max(src.col, dst.col);
 
     for(cur.col++,cur.row++;cur.col<end_col;cur.col++,cur.row++) {
-      char piece = get_piece_at(cur);
-      debug_print("Checking piece: %c", piece);
-      if (piece != '#')
-        return false;
+      check_piece
     }
     return true;
   }
@@ -68,10 +66,7 @@ bool is_way_free(Cell src, Cell dst) {
     int end_col = min(src.col, dst.col);
 
     for(cur.col--,cur.row++;cur.col>end_col;cur.col--,cur.row++) {
-      char piece = get_piece_at(cur);
-      debug_print("Checking piece: %c", piece);
-      if (piece != '#')
-        return false;
+      check_piece
     }
     return true;
   }
