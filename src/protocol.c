@@ -69,6 +69,7 @@ char *move_repr(Move move) {
 }
 
 bool is_piece_white(char piece) {
+  if(piece=='#') debug_print("Trying to check if an empty piece is white!");
   return isupper(piece);
 }
 
