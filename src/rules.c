@@ -22,7 +22,7 @@ bool is_way_free(Cell src, Cell dst) {
   // Horizontal movement
   if (src.row == dst.row) {
     debug_print("Attempting horizontal movement");
-    cur.col = min(src.col,dst.col);
+    cur.col     = min(src.col,dst.col);
     int end_col = max(src.col,dst.col);
 
     for (cur.col++; cur.col < end_col; cur.col++) {
@@ -36,23 +36,44 @@ bool is_way_free(Cell src, Cell dst) {
   // Vectical movement
   else if (src.col == dst.col) {
     debug_print("Attempting vertical movement");
-    cur.row = min(src.row,dst.row);
+    cur.row     = min(src.row,dst.row);
     int end_row = max(src.row,dst.row);
 
     for (cur.row++; cur.row < end_row; cur.row++) {
       char piece = get_piece_at(cur);
+      debug_print("Checking piece: %c", piece);
       if (piece != '#')
         return false;
     }
     return true;
   }
-  // Diagonal movement 1
+  // Diagonal movement 1 - downard line
   else if (src.col - src.row == dst.col - dst.row) {
     debug_print("Attempting diagonal 1 movement");
+    cur = src.col < dst.col ? src : dst;
+    int end_col = max(src.col, dst.col);
+
+    for(cur.col++,cur.row++;cur.col<end_col;cur.col++,cur.row++) {
+      char piece = get_piece_at(cur);
+      debug_print("Checking piece: %c", piece);
+      if (piece != '#')
+        return false;
+    }
+    return true;
   }
-  // Diagonal movement 2
+  // Diagonal movement 2 - upwards line
   else if (7 - src.col - src.row == 7 - dst.col - dst.row) {
     debug_print("Attempting diagonal 2 movement");
+    cur = src.col > dst.col ? src : dst;
+    int end_col = min(src.col, dst.col);
+
+    for(cur.col--,cur.row++;cur.col>end_col;cur.col--,cur.row++) {
+      char piece = get_piece_at(cur);
+      debug_print("Checking piece: %c", piece);
+      if (piece != '#')
+        return false;
+    }
+    return true;
   }
   debug_print("Unknown movement sent to is_way_free!");
   return false;
