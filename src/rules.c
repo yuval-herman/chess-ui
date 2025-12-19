@@ -2,7 +2,6 @@
 #include "definitions.h"
 #include "game.h"
 #include "protocol.h"
-#include <stdio.h>
 
 bool is_move_OOB(Move move) {
   return 0 > move.src.col || move.src.col > 7 ||
