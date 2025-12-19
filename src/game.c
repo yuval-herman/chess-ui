@@ -3,7 +3,6 @@
 #include "protocol.h"
 #include "rules.h"
 #include <assert.h>
-#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -38,7 +37,8 @@ void set_board(char *board) {
   int white_count = 0;
   int black_count = 0;
   for (int i = 0; i<8*4; i++) {
-    if(is_piece_white(board[i])) white_count++;
+    if (board[i]=='#') continue;
+    if (is_piece_white(board[i])) white_count++;
     else black_count++;
   }
   STATE.white_up = white_count >= black_count;
