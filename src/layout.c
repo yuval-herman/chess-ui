@@ -361,14 +361,21 @@ void info_panel() {
             .chars = buffer_slice,
         };
         get_move_repr(buffer_slice, moves.items[i].move);
-        CLAY(CLAY_IDI("MoveContainer", i), {
-             .layout = {
-              .padding = CLAY_PADDING_ALL(8),
-              .sizing = {.width = CLAY_SIZING_GROW()},
-              .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}
-              },
-             .backgroundColor = Clay_Hovered() ? UI.colors.highlighted_cell : UI.colors.board_background
-           }) {
+        Clay_Color bg_color =
+            moves.items[i].tester_code == moves.items[i].backend_code
+                ? UI.colors.board_background
+                : UI.colors.banner_background;
+            CLAY(CLAY_IDI("MoveContainer", i),
+                 {
+                     .layout =
+                         {
+                             .padding = CLAY_PADDING_ALL(8),
+                             .sizing = {.width = CLAY_SIZING_GROW()},
+                             .childAlignment = {.y = CLAY_ALIGN_Y_CENTER},
+                         },
+                     .backgroundColor =
+                         Clay_Hovered() ? UI.colors.highlighted_cell : bg_color,
+                 }) {
           UI.state.move_log_hover = false;
           Clay_OnHover(handle_moe_log_hover, NULL);
           CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
