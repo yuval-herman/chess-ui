@@ -10,15 +10,7 @@
 #endif
 
 typedef struct {
-  Move move;
-  char src_piece;
-  char dst_piece;
-  int backend_code;
-  int inner_tester_code;
-} PieceMove;
-
-typedef struct {
-  PieceMove *items;
+  DataMove *items;
   size_t count;
   size_t capacity;
 } MovesDA;
@@ -72,49 +64,43 @@ void initGameState() {
   STATE.moves.items = malloc(sizeof(STATE.moves.items[0]));
 }
 
-int make_chess_move(Move move) {
+DataMove make_chess_move(Move move) {
   assert(!is_viewing_history());
-#ifdef TESTER_MODE
+#ifndef UI_WORK
   int backend_code = get_move_code(move);
-  if (!is_code_legal(backend_code))
-    return backend_code;
-#elif !defined (UI_WORK)
-  int backend_code = get_move_code(move);
-  if (!is_code_legal(backend_code))
-    return backend_code;
+#else
+  int backend_code = 0;
 #endif
-  MovesDA *moves = &STATE.moves;
-  assert(moves->capacity); // Capacity should be initialized elsewhere
-  if (moves->count == moves->capacity) {
-    moves->capacity *= 2;
-    moves->items = realloc(moves->items, moves->capacity * sizeof(moves->items[0]));
-  }
-  moves->items[moves->count++] = (PieceMove){
+
+  DataMove data_move = {
       .move = move,
       .src_piece = STATE.board[move.src.row][move.src.col],
       .dst_piece = STATE.board[move.dst.row][move.dst.col],
-#ifdef UI_WORK             // in UI work mode everything is legal
-      .backend_code = 0,
-      .inner_tester_code = 0,
-#elif defined(TESTER_MODE) // tester mode needs to report issues
+#ifdef TESTER_MODE // tester mode needs to report issues
       .backend_code = backend_code,
-      .inner_tester_code = is_move_legal(move),
-#else                      // normal operation mode fully depends on the backend
+      .tester_code = is_move_legal(move),
+#else // normal operation mode fully depends on the backend
       .backend_code = backend_code,
-      .inner_tester_code = backend_code,
+      .tester_code = backend_code,
 #endif
   };
-  STATE.showing_move = moves->count;
-  // update board
-  char piece = STATE.board[move.src.row][move.src.col];
-  STATE.board[move.src.row][move.src.col] = '#';
-  STATE.board[move.dst.row][move.dst.col] = piece;
-  STATE.white_turn = !STATE.white_turn;
-#ifndef UI_WORK
-  return backend_code;
-#else
-  return 0;
-#endif
+  if (is_code_legal(backend_code)) {
+    MovesDA *moves = &STATE.moves;
+    assert(moves->capacity); // Capacity should be initialized elsewhere
+    if (moves->count == moves->capacity) {
+      moves->capacity *= 2;
+      moves->items =
+          realloc(moves->items, moves->capacity * sizeof(moves->items[0]));
+    }
+    moves->items[moves->count++] = data_move;
+    STATE.showing_move = moves->count;
+    // update board
+    char piece = STATE.board[move.src.row][move.src.col];
+    STATE.board[move.src.row][move.src.col] = '#';
+    STATE.board[move.dst.row][move.dst.col] = piece;
+    STATE.white_turn = !STATE.white_turn;
+  }
+  return data_move;
 }
 
 char get_piece_at(Cell cell) {
@@ -123,31 +109,20 @@ char get_piece_at(Cell cell) {
   return STATE.board[cell.row][cell.col];
 }
 
-size_t get_moves_log(char moves_log[][MOVE_REPR_LENGTH], size_t max_moves) {
-  max_moves = max_moves < STATE.moves.count ? max_moves : STATE.moves.count;
-  for (size_t i = 0; i < max_moves; i++) {
-    char* move_repr_str = move_repr(STATE.moves.items[i].move);
-    moves_log[i][0] = STATE.moves.items[i].src_piece;
-    moves_log[i][1] = move_repr_str[0];
-    moves_log[i][2] = move_repr_str[1];
-    moves_log[i][3] = ',';
-    moves_log[i][4] = ' ';
-    moves_log[i][5] = move_repr_str[2];
-    moves_log[i][6] = move_repr_str[3];
-  }
-  return max_moves;
+DataMovesArr get_moves_log() {
+  return (DataMovesArr){.items = STATE.moves.items, .count = STATE.moves.count};
 }
 
 size_t get_moves_count() {
   return STATE.moves.count;
 }
 
-void make_move_backward(PieceMove move) {
+void make_move_backward(DataMove move) {
   STATE.board[move.move.src.row][move.move.src.col] = move.src_piece;
   STATE.board[move.move.dst.row][move.move.dst.col] = move.dst_piece;
 }
 
-void make_move_forwards(PieceMove move) {
+void make_move_forwards(DataMove move) {
   if (move.dst_piece == '#')
     STATE.board[move.move.src.row][move.move.src.col] = move.dst_piece;
   else

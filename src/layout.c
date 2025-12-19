@@ -40,18 +40,18 @@ typedef struct {
   struct {
     Cell selected;
     int backend_code; // last code received from the backend
+    int tester_code;  // last code from inner tester
     int banner_timeout;
     bool move_log_hover;
   } state;
+  char* moves_log_buffer;
+  size_t moves_log_buffer_length;
 } UIData;
 
-// Average chess games have around 30-40 moves.
-// The moves log shows moves in this format:
-// "pe2, b8" MOVE_REPR_LENGTH chars
-// I allow up to 200 moves per game, if you want longer games, adjust this accordingly.
-#define MAX_LOGS 200
+
 #define BANNER_TIMEOUT 120
-char move_log_buffer[MAX_LOGS][MOVE_REPR_LENGTH];
+#define MOVE_REPR_LENGTH 6
+
 UIData UI = {0};
 
 void initUIData() {
@@ -105,6 +105,9 @@ void initUIData() {
   UI.state.backend_code   = -1;
   UI.state.banner_timeout = -1;
   UI.state.move_log_hover = false;
+
+  UI.moves_log_buffer_length = 100;
+  UI.moves_log_buffer = malloc(100);
 }
 
 // Returns a chess piece texture for the received char.
@@ -152,11 +155,14 @@ void handle_board_cell_hover(Clay_ElementId element_id,
     int row = (element_id.offset - col) / 8;
     if (UI.state.selected.col >= 0) {
       Cell selected_cell = {UI.state.selected.row, UI.state.selected.col};
-      UI.state.backend_code = make_chess_move((Move){
+      DataMove move = make_chess_move((Move){
           .src = selected_cell,
           .dst = {row, col},
           .piece_moved = get_piece_at(selected_cell),
       });
+      UI.state.backend_code = move.backend_code;
+      UI.state.tester_code = move.tester_code;
+
       if (!is_code_legal(UI.state.backend_code))
         UI.state.banner_timeout = BANNER_TIMEOUT;
 
@@ -167,6 +173,15 @@ void handle_board_cell_hover(Clay_ElementId element_id,
       UI.state.selected.row = row;
     }
   }
+}
+
+void get_move_repr(char *buffer, Move move) {
+  buffer[0] = move.src.col + 'a';
+  buffer[1] = 7 - move.src.row + '1';
+  buffer[2] = ',';
+  buffer[3] = ' ';
+  buffer[4] = move.dst.col + 'a';
+  buffer[5] = 7 - move.dst.row + '1';
 }
 
 void turn_indicator(bool is_white) {
@@ -333,12 +348,19 @@ void info_panel() {
         .backgroundColor = UI.colors.light_background
       }
     ) {
-      size_t move_count = get_moves_log(move_log_buffer, MAX_LOGS);
-      for (size_t i = 0; i < move_count; i++) {
-        // For the actuall string we only show the second character onward, the first is the piece sign.
-        Clay_String log_line = {.isStaticallyAllocated = true,
-                                .length = MOVE_REPR_LENGTH - 1,
-                                .chars = move_log_buffer[i] + 1};
+      DataMovesArr moves = get_moves_log();
+      if (UI.moves_log_buffer_length < moves.count * MOVE_REPR_LENGTH) {
+        UI.moves_log_buffer_length = moves.count*1.5;
+        UI.moves_log_buffer = realloc(UI.moves_log_buffer, UI.moves_log_buffer_length);
+      }
+      for (size_t i = 0; i < moves.count; i++) {
+        char* buffer_slice = UI.moves_log_buffer + i * MOVE_REPR_LENGTH + 1;
+        Clay_String log_line = {
+            .isStaticallyAllocated = false,
+            .length = MOVE_REPR_LENGTH,
+            .chars = buffer_slice,
+        };
+        get_move_repr(buffer_slice, moves.items[i].move);
         CLAY(CLAY_IDI("MoveContainer", i), {
              .layout = {
               .padding = CLAY_PADDING_ALL(8),
@@ -356,7 +378,7 @@ void info_panel() {
                                .height = CLAY_SIZING_FIXED(30),
                                .width = CLAY_SIZING_FIXED(30),
                            }},
-            .image = {.imageData = char2tex(move_log_buffer[i][0])},
+            .image = {.imageData = char2tex(moves.items[i].src_piece)},
             .aspectRatio = {
               1
             }}) {}

@@ -4,7 +4,18 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define MOVE_REPR_LENGTH 7
+typedef struct {
+  Move move;
+  char src_piece;
+  char dst_piece;
+  int backend_code;
+  int tester_code;
+} DataMove;
+
+typedef struct {
+  const DataMove * items;
+  const size_t count;
+} DataMovesArr;
 
 void initGameState();
 void set_board(char *board);
@@ -12,11 +23,9 @@ void set_board(char *board);
 bool is_whites_turn();
 void set_whites_turn(bool turn);
 bool is_white_up();
-int make_chess_move(Move move);
+DataMove make_chess_move(Move move);
 char get_piece_at(Cell cell);
-// Returns an array of move represantations, each MOVE_REPR_LENGTH characters long without null termination.
-// Each call invalidates previous ones.
-size_t get_moves_log(char moves_log[][MOVE_REPR_LENGTH], size_t max_moves);
+DataMovesArr get_moves_log();
 size_t get_moves_count();
 
 size_t get_white_count();
