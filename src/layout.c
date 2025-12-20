@@ -112,8 +112,8 @@ void initUIData() {
 
 // Returns a chess piece texture for the received char.
 // Returns white variant for white==true, black otherwise.
-Texture2D* char2tex(char c) {
-  switch (c) {
+Texture2D* piece2tex(char piece) {
+  switch (piece) {
     case 'b': return &UI.textures.chess_pieces.b_bishop;
     case 'B': return &UI.textures.chess_pieces.w_bishop;
     case 'k': return &UI.textures.chess_pieces.b_king;
@@ -279,7 +279,7 @@ void board_layout() {
                   .width = CLAY_SIZING_GROW(0),
                 }
               },
-              .image = { .imageData = char2tex(get_piece_at((Cell){row, col})) },
+              .image = { .imageData = piece2tex(get_piece_at((Cell){row, col})) },
               .aspectRatio = {1}
             }) {}
           }
@@ -385,7 +385,7 @@ void info_panel() {
                                .height = CLAY_SIZING_FIXED(30),
                                .width = CLAY_SIZING_FIXED(30),
                            }},
-            .image = {.imageData = char2tex(moves.items[i].src_piece)},
+            .image = {.imageData = piece2tex(moves.items[i].src_piece)},
             .aspectRatio = {
               1
             }}) {}
