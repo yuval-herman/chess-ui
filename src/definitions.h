@@ -2,6 +2,8 @@
 #define DEFINITIONS_H
 #include <stdio.h>
 
+typedef unsigned int bitset;
+
 typedef enum {
   MOVE_VALID = 0,
   MOVE_CHECK,
