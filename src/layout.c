@@ -130,7 +130,7 @@ Texture2D* piece2tex(char piece) {
   }
 }
 
-void handle_moe_log_hover(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
+void handle_move_log_hover(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
   (void)pointer_data;
   (void)user_data;
   // TODO: actually require clicking the log entry
@@ -377,7 +377,7 @@ void info_panel() {
                          Clay_Hovered() ? UI.colors.highlighted_cell : bg_color,
                  }) {
           UI.state.move_log_hover = false;
-          Clay_OnHover(handle_moe_log_hover, NULL);
+          Clay_OnHover(handle_move_log_hover, NULL);
           CLAY_TEXT(log_line, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
             CLAY(CLAY_IDI("LogLineIcon", i), {
             .layout = {.sizing =
