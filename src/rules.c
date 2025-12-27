@@ -115,6 +115,13 @@ Move_Type get_move_move_type(bitset move_type, Cell src, Cell dst) {
       abs(src.col - dst.col) == abs(src.row - dst.row))
     return MOVE_TYPE_DIAGONAL;
 
+  if (move_type & MOVE_TYPE_KNIGHT) {
+    int col_diff = abs(src.col - dst.col);
+    int row_diff = abs(src.row - dst.row);
+    if ((col_diff == 1 && row_diff == 2) || (col_diff == 2 && row_diff == 1))
+      return MOVE_TYPE_KNIGHT;
+  }
+
   return MOVE_TYPE_ILLEGAL;
 }
 
