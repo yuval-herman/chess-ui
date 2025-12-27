@@ -10,11 +10,8 @@ typedef enum {
   MOVE_TYPE_ILLEGAL    = 0,
   MOVE_TYPE_VERTICAL   = 1,
   MOVE_TYPE_HORIZONTAL = 2,
-  // Diagonal movement 1 - downard line
-  MOVE_TYPE_DIAGONAL_1 = 4,
-  // Diagonal movement 2 - upwards line
-  MOVE_TYPE_DIAGONAL_2 = 8,
-  MOVE_TYPE_KNIGHT     = 16,
+  MOVE_TYPE_DIAGONAL   = 4,
+  MOVE_TYPE_KNIGHT     = 8,
 } Move_Type;
 
 bool is_move_OOB(Move move) {
@@ -31,10 +28,10 @@ bool is_move_stationary(Move move) {
 // Helper macro for is_way_free
 #define check_piece                                                            \
   char piece = get_piece_at(cur);                                              \
-  debug_print("Checking piece: %c", piece);                                    \
+  debug_print("Checking piece: %c at (%d,%d)", piece, cur.col + 1,             \
+              cur.row + 1);                                                    \
   if (piece != '#')                                                            \
     return false;
-
 
 // Check if all the cell are empty from src to dst, excluding src and dst
 // themselves
@@ -61,22 +58,13 @@ bool is_way_free(Move_Type move_type, Cell src, Cell dst) {
       }
       return true;
     }
-    case MOVE_TYPE_DIAGONAL_1: {
-      debug_print("Testing diagonal 1 movement");
-      cur = src.col < dst.col ? src : dst;
-      int end_col = max(src.col, dst.col);
+    case MOVE_TYPE_DIAGONAL: {
+      debug_print("Testing diagonal movement");
+      int col_dir = src.col < dst.col ? 1 : -1;
+      int row_dir = src.row < dst.row ? 1 : -1;
 
-      for (cur.col++, cur.row++; cur.col < end_col; cur.col++, cur.row++) {
-        check_piece
-      }
-      return true;
-    }
-    case MOVE_TYPE_DIAGONAL_2: {
-      debug_print("Testing diagonal 2 movement");
-      cur = src.col > dst.col ? src : dst;
-      int end_col = min(src.col, dst.col);
-
-      for (cur.col--, cur.row++; cur.col > end_col; cur.col--, cur.row++) {
+      for (cur.col += col_dir, cur.row += row_dir; cur.col != dst.col;
+           cur.col += col_dir, cur.row += row_dir) {
         check_piece
       }
       return true;
@@ -94,11 +82,10 @@ bitset get_piece_move_types(char piece) {
   switch (piece) {
   case 'b':
   case 'B':
-    return MOVE_TYPE_DIAGONAL_1 | MOVE_TYPE_DIAGONAL_2;
+    return MOVE_TYPE_DIAGONAL;
   case 'k':
   case 'K':
-    return MOVE_TYPE_HORIZONTAL | MOVE_TYPE_VERTICAL | MOVE_TYPE_DIAGONAL_1 |
-           MOVE_TYPE_DIAGONAL_2;
+    return MOVE_TYPE_HORIZONTAL | MOVE_TYPE_VERTICAL | MOVE_TYPE_DIAGONAL;
   case 'n':
   case 'N':
     return MOVE_TYPE_KNIGHT;
@@ -107,8 +94,7 @@ bitset get_piece_move_types(char piece) {
     return MOVE_TYPE_VERTICAL;
   case 'q':
   case 'Q':
-    return MOVE_TYPE_HORIZONTAL | MOVE_TYPE_VERTICAL | MOVE_TYPE_DIAGONAL_1 |
-           MOVE_TYPE_DIAGONAL_2;
+    return MOVE_TYPE_HORIZONTAL | MOVE_TYPE_VERTICAL | MOVE_TYPE_DIAGONAL;
   case 'r':
   case 'R':
     return MOVE_TYPE_HORIZONTAL | MOVE_TYPE_VERTICAL;
@@ -125,24 +111,18 @@ Move_Type get_move_move_type(bitset move_type, Cell src, Cell dst) {
   if (move_type & MOVE_TYPE_VERTICAL && src.col == dst.col)
     return MOVE_TYPE_VERTICAL;
 
-  if ((move_type & MOVE_TYPE_DIAGONAL_1 &&
-       src.col - src.row == dst.col - dst.row))
-    return MOVE_TYPE_DIAGONAL_1;
-
-  if (move_type & MOVE_TYPE_DIAGONAL_2 &&
-      src.col + src.row == dst.col + dst.row)
-    return MOVE_TYPE_DIAGONAL_2;
+  if (move_type & MOVE_TYPE_DIAGONAL &&
+      abs(src.col - dst.col) == abs(src.row - dst.row))
+    return MOVE_TYPE_DIAGONAL;
 
   return MOVE_TYPE_ILLEGAL;
 }
 
 void print_move_types(bitset move_types) {
-  fprintf(stderr, "bitset containes the following moves types: ");
   if (move_types & MOVE_TYPE_ILLEGAL) fprintf(stderr, " MOVE_TYPE_ILLEGAL");
   if (move_types & MOVE_TYPE_VERTICAL) fprintf(stderr, " MOVE_TYPE_VERTICAL");
   if (move_types & MOVE_TYPE_HORIZONTAL) fprintf(stderr, " MOVE_TYPE_HORIZONTAL");
-  if (move_types & MOVE_TYPE_DIAGONAL_1) fprintf(stderr, " MOVE_TYPE_DIAGONAL_1");
-  if (move_types & MOVE_TYPE_DIAGONAL_2) fprintf(stderr, " MOVE_TYPE_DIAGONAL_2");
+  if (move_types & MOVE_TYPE_DIAGONAL) fprintf(stderr, " MOVE_TYPE_DIAGONAL");
   if (move_types & MOVE_TYPE_KNIGHT) fprintf(stderr, " MOVE_TYPE_KNIGHT");
   if (move_types == 0) fprintf(stderr, " MOVE_TYPE_ILLEGAL");
   fprintf(stderr, "\n");
@@ -160,8 +140,10 @@ Move_Codes is_move_legal(Move move) {
   if (is_move_OOB(move))
     return MOVE_OUT_OF_BOUNDS;
   bitset piece_move_type = get_piece_move_types(move.piece_moved);
+  debug_print("%c movement type are:", move.piece_moved);
   print_move_types(piece_move_type);
   Move_Type move_move_type = get_move_move_type(piece_move_type, move.src, move.dst);
+  debug_print("actual move preformed is:");
   print_move_types(move_move_type);
   if (move_move_type == MOVE_TYPE_ILLEGAL || !is_way_free(move_move_type, move.src, move.dst))
     return MOVE_ILLEGAL_PATTERN;
