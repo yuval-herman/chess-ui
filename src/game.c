@@ -164,3 +164,18 @@ size_t get_black_count() {
   }
   return count;
 }
+
+Cell get_occupied_cell(unsigned int piece_to_get) {
+  const int board_size = 8 * 8;
+  unsigned int seen_pieces = 0;
+  int i = 0;
+  while (seen_pieces < piece_to_get) {
+    char piece = ((char *)STATE.board)[i];
+    if (piece != '#') seen_pieces++;
+    i++;
+    if (i >= board_size) i = 0;
+  }
+  int col = i % 8;
+  int row = (i - col) / 8;
+  return (Cell){.col = col, .row = row};
+}

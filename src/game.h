@@ -39,4 +39,8 @@ void reset_board();
 // Returns true if the board is not the actuall game but a log history snapshot
 bool is_viewing_history();
 
+// Returns a piece by it's index as counted from all pieces on the board. Wraps around if a big
+// number is requested.
+Cell get_occupied_cell(unsigned int piece_to_get);
+
 #endif // GAME_H

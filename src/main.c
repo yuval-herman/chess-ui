@@ -48,6 +48,7 @@ void clean_resources() {
 }
 
 int main(void) {
+  SetRandomSeed(67); // I.O.
   Clay_Raylib_Initialize(1500, 800, "chess",
                          FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT |
                              FLAG_VSYNC_HINT);

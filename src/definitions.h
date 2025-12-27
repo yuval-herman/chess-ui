@@ -30,5 +30,7 @@ typedef struct {
 #define debug_print(fmt, ...) fprintf(stderr, fmt " %s:%d\n", ##__VA_ARGS__, __FILE__, __LINE__)
 #define min(a, b) (a < b ? a : b)
 #define max(a, b) (a > b ? a : b)
+#define STR(str) #str
+#define ASSTR(str) STR(str)
 
 #endif // DEFINITIONS_H

@@ -10,6 +10,8 @@
 #include <string.h>
 #include <time.h>
 
+#define RANDOM_TESTS 500
+
 typedef struct {
   struct {
     struct {
@@ -130,6 +132,26 @@ Texture2D* piece2tex(char piece) {
   }
 }
 
+void handle_test_button_hover(Clay_ElementId element_id, Clay_PointerData pointer_data,
+                          void *user_data) {
+  (void)pointer_data;
+  (void)user_data;
+  (void)element_id;
+  if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+    for (int i = 0; i < RANDOM_TESTS; i++) {
+      Cell src = get_occupied_cell(GetRandomValue(0, 8*8));
+      Cell dst = {GetRandomValue(0, 7), GetRandomValue(0, 7)};
+      DataMove move = make_chess_move((Move){
+        .src = src,
+        .dst = dst,
+        .piece_moved = get_piece_at(src),
+      });
+      UI.state.backend_code = move.backend_code;
+      UI.state.tester_code = move.tester_code;
+    }
+  }
+}
+
 void handle_move_log_hover(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
   (void)pointer_data;
   (void)user_data;
@@ -232,6 +254,34 @@ void illegal_move_banner() {
   }
 }
 
+void board_cell(int row, int col) {
+  Clay_Color cell_color = (row + col) % 2 ? UI.colors.odd_cell : UI.colors.even_cell;
+  bool cell_selected = row == UI.state.selected.row && col == UI.state.selected.col;
+  CLAY(CLAY_IDI("cell", col + row * 8),{
+        .layout = {
+          .sizing = {
+            .width = CLAY_SIZING_GROW(),
+            .height = CLAY_SIZING_GROW(),
+            }
+          },
+        .cornerRadius = CLAY_CORNER_RADIUS(4),
+        .backgroundColor = (Clay_Hovered() || cell_selected) ? UI.colors.highlighted_cell : cell_color,
+        .aspectRatio = {.aspectRatio = 1}
+  }) {
+    Clay_OnHover(handle_board_cell_hover, NULL);
+    CLAY_AUTO_ID({
+      .layout = {
+        .sizing = {
+          .height = CLAY_SIZING_GROW(0),
+          .width = CLAY_SIZING_GROW(0),
+        }
+      },
+      .image = { .imageData = piece2tex(get_piece_at((Cell){.row = row, .col = col})) },
+      .aspectRatio = {1}
+    }) {}
+  }
+}
+
 void board_layout() {
   CLAY(CLAY_ID("BoardContainer"), {
        .layout = {
@@ -258,31 +308,7 @@ void board_layout() {
             }
         }) {
         for (int col = 0; col < 8; col++) {
-          Clay_Color cell_color = (row + col) % 2 ? UI.colors.odd_cell : UI.colors.even_cell;
-          bool cell_selected = row == UI.state.selected.row && col == UI.state.selected.col;
-          CLAY(CLAY_IDI("cell", col + row * 8),{
-                .layout = {
-                  .sizing = {
-                    .width = CLAY_SIZING_GROW(),
-                    .height = CLAY_SIZING_GROW(),
-                    }
-                  },
-                .cornerRadius = CLAY_CORNER_RADIUS(4),
-                .backgroundColor = (Clay_Hovered() || cell_selected) ? UI.colors.highlighted_cell : cell_color,
-                .aspectRatio = {.aspectRatio = 1}
-          }) {
-            Clay_OnHover(handle_board_cell_hover, NULL);
-            CLAY_AUTO_ID({
-              .layout = {
-                .sizing = {
-                  .height = CLAY_SIZING_GROW(0),
-                  .width = CLAY_SIZING_GROW(0),
-                }
-              },
-              .image = { .imageData = piece2tex(get_piece_at((Cell){row, col})) },
-              .aspectRatio = {1}
-            }) {}
-          }
+          board_cell(row, col);
         }
       }
     }
@@ -332,6 +358,24 @@ void info_panel() {
         snprintf(t_buffer, 3, "%zu", get_black_count());
         Clay_String black_count_str = {.length = 2, .isStaticallyAllocated = true, .chars = t_buffer};
         CLAY_TEXT(black_count_str, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
+        CLAY(CLAY_ID("TestButton"),
+             {
+               .layout =
+                   {
+                     .sizing =
+                         {
+                           .height = CLAY_SIZING_FIT(),
+                           .width = CLAY_SIZING_FIT(),
+                         },
+                     .padding = CLAY_PADDING_ALL(4),
+                   },
+               .backgroundColor = Clay_Hovered() ? (Clay_Color){125, 125, 125, 255}
+                                                 : (Clay_Color){255, 255, 255, 255},
+             }) {
+          Clay_OnHover(handle_test_button_hover, NULL);
+          CLAY_TEXT(CLAY_STRING("Test " ASSTR(RANDOM_TESTS) " random moves"),
+                    CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+        }
         }
     CLAY_TEXT(CLAY_STRING("Move history:"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
     CLAY(CLAY_ID("MoveHistoryPanel"), {
