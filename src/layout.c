@@ -448,9 +448,13 @@ void main_layout() {
     do_move(src, dst);
     UI.state.banner_timeout = -1;
     UI.state.random_moves_left--;
+    SetTraceLogLevel(LOG_NONE);
     SetTargetFPS(0);
+    SetTraceLogLevel(LOG_INFO);
   } else {
+    SetTraceLogLevel(LOG_NONE);
     SetTargetFPS(60);
+    SetTraceLogLevel(LOG_INFO);
   }
   CLAY(CLAY_ID("WindowContainer"), {
         .layout = {
