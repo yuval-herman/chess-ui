@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
   nob_cc(&cmd);
   nob_cc_flags(&cmd);
   nob_cc_output(&cmd, "main");
-  nob_cmd_append(&cmd, "-g", "-O0");
+  nob_cmd_append(&cmd, "-O2");
   nob_cmd_append(&cmd, "-Iraylib/include");
   nob_cmd_append(&cmd, "-Iexternal_includes");
   nob_cc_inputs(&cmd, "src/main.c");
@@ -113,12 +113,7 @@ int main(int argc, char **argv) {
 #else
     nob_cmd_append(&cmd, "wine", "main.exe");
 #endif
-    Nob_Procs procs = {0};
-    nob_cmd_run(&cmd, .async = &procs);
-    // nob_cmd_append(&cmd, "wine", "backend/main.exe");
-    // sleep(4);
-    // nob_cmd_run(&cmd, .async = &procs);
-    nob_procs_flush(&procs);
+    nob_cmd_run(&cmd);
   }
   return 0;
 }
