@@ -11,7 +11,7 @@
 #include <string.h>
 #include <time.h>
 
-#define RANDOM_TESTS 20000
+#define RANDOM_TESTS 1000
 
 typedef struct {
   struct {
@@ -448,6 +448,9 @@ void main_layout() {
     do_move(src, dst);
     UI.state.banner_timeout = -1;
     UI.state.random_moves_left--;
+    SetTargetFPS(0);
+  } else {
+    SetTargetFPS(60);
   }
   CLAY(CLAY_ID("WindowContainer"), {
         .layout = {
