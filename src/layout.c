@@ -45,6 +45,7 @@ typedef struct {
     int tester_code;  // last code from inner tester
     int banner_timeout;
     bool move_log_hover;
+    int random_moves_left; // amount of random moves left to perform in tester mode
   } state;
   char* moves_log_buffer;
   size_t moves_log_buffer_length;
@@ -107,6 +108,7 @@ void initUIData() {
   UI.state.backend_code   = -1;
   UI.state.banner_timeout = -1;
   UI.state.move_log_hover = false;
+  UI.state.random_moves_left = 0;
 
   UI.moves_log_buffer_length = 100;
   UI.moves_log_buffer = malloc(100);
@@ -132,29 +134,33 @@ Texture2D* piece2tex(char piece) {
   }
 }
 
+void do_move(Cell src, Cell dst) {
+  DataMove move = make_chess_move((Move){
+    .src = src,
+    .dst = dst,
+    .piece_moved = get_piece_at(src),
+  });
+  UI.state.backend_code = move.backend_code;
+  UI.state.tester_code = move.tester_code;
+
+  if (!is_code_legal(UI.state.backend_code)) UI.state.banner_timeout = BANNER_TIMEOUT;
+}
+
 void handle_test_button_hover(Clay_ElementId element_id, Clay_PointerData pointer_data,
                           void *user_data) {
   (void)pointer_data;
   (void)user_data;
   (void)element_id;
   if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-    for (int i = 0; i < RANDOM_TESTS; i++) {
-      Cell src = get_occupied_cell(GetRandomValue(0, 8*8));
-      Cell dst = {GetRandomValue(0, 7), GetRandomValue(0, 7)};
-      DataMove move = make_chess_move((Move){
-        .src = src,
-        .dst = dst,
-        .piece_moved = get_piece_at(src),
-      });
-      UI.state.backend_code = move.backend_code;
-      UI.state.tester_code = move.tester_code;
-    }
+    UI.state.random_moves_left = RANDOM_TESTS;
   }
 }
 
 void handle_move_log_hover(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
   (void)pointer_data;
   (void)user_data;
+  // Don't allow viewing history while testing moves
+  if (UI.state.random_moves_left > 0) return;
   // TODO: actually require clicking the log entry
   // if(pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME)
   UI.state.move_log_hover = true;
@@ -177,17 +183,9 @@ void handle_board_cell_hover(Clay_ElementId element_id,
     int row = (element_id.offset - col) / 8;
     if (UI.state.selected.col >= 0) {
       Cell selected_cell = {UI.state.selected.row, UI.state.selected.col};
-      DataMove move = make_chess_move((Move){
-          .src = selected_cell,
-          .dst = {row, col},
-          .piece_moved = get_piece_at(selected_cell),
-      });
-      UI.state.backend_code = move.backend_code;
-      UI.state.tester_code = move.tester_code;
+      Cell dst_cell = {row, col};
 
-      if (!is_code_legal(UI.state.backend_code))
-        UI.state.banner_timeout = BANNER_TIMEOUT;
-
+      do_move(selected_cell, dst_cell);
       UI.state.selected.col = -1;
       UI.state.selected.row = -1;
     } else {
@@ -441,6 +439,16 @@ void info_panel() {
 
 void main_layout() {
   if(is_viewing_history() && !UI.state.move_log_hover) reset_board();
+  if(UI.state.random_moves_left > 0) {
+      Cell src = get_occupied_cell(GetRandomValue(0, 8*8));
+      debug_print("Try to move piece: %c", get_piece_at(src));
+      UI.state.selected.row = src.row;
+      UI.state.selected.col = src.col;
+      Cell dst = {GetRandomValue(0, 7), GetRandomValue(0, 7)};
+      do_move(src, dst);
+      UI.state.banner_timeout = -1;
+      UI.state.random_moves_left--;
+  }
   CLAY(CLAY_ID("WindowContainer"), {
         .layout = {
           .sizing = {
