@@ -140,12 +140,12 @@ Move_Codes is_move_legal(Move move) {
     return MOVE_STATIONARY;
   if (move.piece_moved == '#' || is_whites_turn() != is_piece_white(move.piece_moved))
     return MOVE_INVALID_SOURCE;
+  if (is_move_OOB(move))
+    return MOVE_OUT_OF_BOUNDS;
 
   char dst_piece = get_piece_at(move.dst);
   if (dst_piece != '#' && is_whites_turn() == is_piece_white(dst_piece))
     return MOVE_FRIENDLY_FIRE;
-  if (is_move_OOB(move))
-    return MOVE_OUT_OF_BOUNDS;
   bitset piece_move_type = get_piece_move_types(move.piece_moved);
   debug_print("%c movement type are:", move.piece_moved);
   print_move_types(piece_move_type);
