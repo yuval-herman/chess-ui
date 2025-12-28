@@ -175,7 +175,9 @@ Cell get_occupied_cell(unsigned int piece_to_get) {
     i++;
     if (i >= board_size) i = 0;
   }
+  if (i != 0) i--;
   int col = i % 8;
   int row = (i - col) / 8;
+  debug_print("Occupied cell is: (%d, %d)", col, row);
   return (Cell){.col = col, .row = row};
 }
