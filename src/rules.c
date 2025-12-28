@@ -2,6 +2,9 @@
 #include "definitions.h"
 #include "game.h"
 #include "protocol.h"
+#include "raylib.h"
+#include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -156,4 +159,26 @@ Move_Codes is_move_legal(Move move) {
     return MOVE_ILLEGAL_PATTERN;
 
   return MOVE_VALID;
+}
+
+Cell get_random_move_cell(Cell src) {
+  int move_type = GetRandomValue(1, 4);
+  // all straight movements
+  if (1 <= move_type && move_type <= 3) {
+    int row_dir = GetRandomValue(-1, 1);
+    int col_dir = GetRandomValue(-1, 1);
+    return (Cell){.row = src.row * GetRandomValue(0, 7) * row_dir,
+                  .col = src.col * GetRandomValue(0, 7) * col_dir};
+  }
+  // knight movement
+  else {
+    int col = GetRandomValue(1, 2) * (GetRandomValue(0, 1) ? -1 : 1);
+    int row;
+    if (col == 1) {
+      row = 2 * (GetRandomValue(0, 1) ? -1 : 1);
+    } else {
+      row = 1 * (GetRandomValue(0, 1) ? -1 : 1);
+    }
+    return (Cell){.col = col, .row = row};
+  }
 }
