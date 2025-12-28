@@ -49,9 +49,7 @@ void clean_resources() {
 
 int main(void) {
   SetRandomSeed(67); // I.O.
-  Clay_Raylib_Initialize(1500, 800, "chess",
-                         FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT |
-                             FLAG_VSYNC_HINT);
+  Clay_Raylib_Initialize(1500, 800, "chess", FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
 
   initUIData();
   initGameState();
@@ -91,6 +89,7 @@ int main(void) {
     BeginDrawing();
     ClearBackground(BLACK);
     Clay_Raylib_Render(renderCommands, fonts);
+    DrawFPS(10, 10);
     EndDrawing();
   }
   clean_resources();
