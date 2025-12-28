@@ -1,6 +1,7 @@
 #include "game.h"
 #include "definitions.h"
 #include "protocol.h"
+#include "raylib.h"
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
@@ -165,19 +166,16 @@ size_t get_black_count() {
   return count;
 }
 
-Cell get_occupied_cell(unsigned int piece_to_get) {
-  const int board_size = 8 * 8;
-  unsigned int seen_pieces = 0;
-  int i = 0;
-  while (seen_pieces < piece_to_get) {
-    char piece = ((char *)STATE.board)[i];
-    if (piece != '#') seen_pieces++;
-    i++;
-    if (i >= board_size) i = 0;
+Cell get_random_player_cell(bool white) {
+  int piece_count = white ? get_white_count() : get_black_count();
+  int selected_piece_index = GetRandomValue(1, piece_count);
+  int count = 0;
+  for (int row = 0; row < 8; row++) {
+    for (int col = 0; col < 8; col++) {
+      char piece = STATE.board[row][col];
+      if (piece != '#' && white == is_piece_white(piece)) count++;
+      if (count == selected_piece_index) return (Cell){.col = col, .row = row};
+    }
   }
-  if (i != 0) i--;
-  int col = i % 8;
-  int row = (i - col) / 8;
-  debug_print("Occupied cell is: (%d, %d)", col, row);
-  return (Cell){.col = col, .row = row};
+  assert(false && "reached unreachable place");
 }

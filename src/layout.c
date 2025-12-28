@@ -11,7 +11,7 @@
 #include <string.h>
 #include <time.h>
 
-#define RANDOM_TESTS 800
+#define RANDOM_TESTS 20000
 
 typedef struct {
   struct {
@@ -441,25 +441,12 @@ void info_panel() {
 void main_layout() {
   if(is_viewing_history() && !UI.state.move_log_hover) reset_board();
   if (UI.state.random_moves_left > 0) {
-    // Pick a random occupied cell that belongs to the side to move.
-    Cell src = {.row = -1, .col = -1};
-    int attempts = 0;
-    while (attempts++ < 10) {
-      Cell cand = get_occupied_cell(GetRandomValue(0, 8 * 8 - 1));
-      char p = get_piece_at(cand);
-      if (is_piece_white(p) == is_whites_turn()) {
-        src = cand;
-        break;
-      }
-    }
-    if (src.row >= 0) {
-      debug_print("Try to move piece: %c", get_piece_at(src));
-      UI.state.selected.row = src.row;
-      UI.state.selected.col = src.col;
-      Cell dst = get_random_move_cell(src);
-      do_move(src, dst);
-      UI.state.banner_timeout = -1;
-    }
+    Cell src = get_random_player_cell(is_whites_turn());
+    UI.state.selected.row = src.row;
+    UI.state.selected.col = src.col;
+    Cell dst = get_random_move_cell(src);
+    do_move(src, dst);
+    UI.state.banner_timeout = -1;
     UI.state.random_moves_left--;
   }
   CLAY(CLAY_ID("WindowContainer"), {
