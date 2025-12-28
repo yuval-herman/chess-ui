@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-char move_repr_buffer[4];
+char move_repr_buffer[5];
 
 bool protocol_init() {
   if (!pipe_init()) {
@@ -65,6 +65,7 @@ char *move_repr(Move move) {
   move_repr_buffer[1] = 7 - move.src.row + '1';
   move_repr_buffer[2] = move.dst.col + 'a';
   move_repr_buffer[3] = 7 - move.dst.row + '1';
+  move_repr_buffer[4] = '\0';
   return move_repr_buffer;
 }
 

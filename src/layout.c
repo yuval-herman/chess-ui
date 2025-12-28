@@ -393,7 +393,7 @@ void info_panel() {
     ) {
       DataMovesArr moves = get_moves_log();
       if (UI.moves_log_buffer_length < moves.count * MOVE_REPR_LENGTH) {
-        UI.moves_log_buffer_length = moves.count*1.5;
+        UI.moves_log_buffer_length *= 2;
         UI.moves_log_buffer = realloc(UI.moves_log_buffer, UI.moves_log_buffer_length);
       }
       for (size_t i = 0; i < moves.count; i++) {
