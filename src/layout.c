@@ -439,7 +439,10 @@ void info_panel() {
 }
 
 void main_layout() {
-  if(is_viewing_history() && !UI.state.move_log_hover) reset_board();
+
+  if (is_viewing_history() && !UI.state.move_log_hover &&
+      !Clay_PointerOver(CLAY_ID("MoveHistoryPanel")))
+    reset_board();
   if (UI.state.random_moves_left > 0) {
     Cell src = get_random_player_cell(is_whites_turn());
     UI.state.selected.row = src.row;
