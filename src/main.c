@@ -66,7 +66,8 @@ int main(void) {
   Font fonts[1] = {LoadFontFromMemory(".ttf", roboto, roboto_size, 60, NULL, 0)};
   Clay_SetMeasureTextFunction(Raylib_MeasureText, fonts);
 
-  // Clay_SetDebugModeEnabled(true);
+  SetTargetFPS(60);
+  
   if(!wait_for_backend(fonts[0])) {
     clean_resources();
     return 1;
