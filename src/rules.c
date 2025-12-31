@@ -162,23 +162,25 @@ Move_Codes is_move_legal(Move move) {
 }
 
 Cell get_random_move_cell(Cell src) {
-  int move_type = GetRandomValue(1, 4);
-  // all straight movements
-  if (1 <= move_type && move_type <= 3) {
-    int row_dir = GetRandomValue(-1, 1);
-    int col_dir = GetRandomValue(-1, 1);
-    return (Cell){.row = src.row * GetRandomValue(0, 7) * row_dir,
-                  .col = src.col * GetRandomValue(0, 7) * col_dir};
-  }
-  // knight movement
-  else {
-    int col = GetRandomValue(1, 2) * (GetRandomValue(0, 1) ? -1 : 1);
-    int row;
-    if (col == 1) {
-      row = 2 * (GetRandomValue(0, 1) ? -1 : 1);
-    } else {
-      row = 1 * (GetRandomValue(0, 1) ? -1 : 1);
+  Cell options[64];
+  int opt_count = 0;
+  char piece = get_piece_at(src);
+  if (piece == '#')
+    return (Cell){.row = -1, .col = -1};
+
+  for (int r = 0; r < 8; r++) {
+    for (int c = 0; c < 8; c++) {
+      Cell dst = {.row = r, .col = c};
+      Move m = {.src = src, .dst = dst, .piece_moved = piece};
+      if (is_move_legal(m) == MOVE_VALID) {
+        options[opt_count++] = dst;
+      }
     }
-    return (Cell){.col = col, .row = row};
   }
+
+  if (opt_count == 0)
+    return (Cell){.row = -1, .col = -1};
+
+  int idx = GetRandomValue(0, opt_count - 1);
+  return options[idx];
 }
