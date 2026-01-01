@@ -12,6 +12,8 @@
 #include <time.h>
 
 #define RANDOM_TESTS 1000
+#define RANDOM_TESTS_100 100
+#define RANDOM_TESTS_500 500
 
 typedef struct {
   struct {
@@ -47,6 +49,7 @@ typedef struct {
     int banner_timeout;
     bool move_log_hover;
     int random_moves_left; // amount of random moves left to perform in tester mode
+    bool testing_menu_open;
   } state;
   char* moves_log_buffer;
   size_t moves_log_buffer_length;
@@ -110,6 +113,7 @@ void initUIData() {
   UI.state.banner_timeout = -1;
   UI.state.move_log_hover = false;
   UI.state.random_moves_left = 0;
+  UI.state.testing_menu_open = false;
 
   UI.moves_log_buffer_length = 100;
   UI.moves_log_buffer = malloc(100);
@@ -149,11 +153,37 @@ void do_move(Cell src, Cell dst) {
 
 void handle_test_button_hover(Clay_ElementId element_id, Clay_PointerData pointer_data,
                           void *user_data) {
-  (void)pointer_data;
-  (void)user_data;
   (void)element_id;
+  (void)user_data;
+  if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+    UI.state.testing_menu_open = !UI.state.testing_menu_open;
+  }
+}
+
+void handle_test_option_100(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
+  (void)element_id;
+  (void)user_data;
+  if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+    UI.state.random_moves_left = RANDOM_TESTS_100;
+    UI.state.testing_menu_open = false;
+  }
+}
+
+void handle_test_option_500(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
+  (void)element_id;
+  (void)user_data;
+  if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+    UI.state.random_moves_left = RANDOM_TESTS_500;
+    UI.state.testing_menu_open = false;
+  }
+}
+
+void handle_test_option_1000(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
+  (void)element_id;
+  (void)user_data;
   if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
     UI.state.random_moves_left = RANDOM_TESTS;
+    UI.state.testing_menu_open = false;
   }
 }
 
@@ -372,8 +402,33 @@ void info_panel() {
                                                  : (Clay_Color){255, 255, 255, 255},
              }) {
           Clay_OnHover(handle_test_button_hover, NULL);
-          CLAY_TEXT(CLAY_STRING("Test " ASSTR(RANDOM_TESTS) " random moves"),
-                    CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+          CLAY_TEXT(CLAY_STRING("Test"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
+        }
+
+        if (UI.state.testing_menu_open) {
+          CLAY(CLAY_ID("TestMenu"), {
+              .layout = {
+                .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                .sizing = {.width = CLAY_SIZING_FIT(), .height = CLAY_SIZING_FIT()},
+                .childGap = 4,
+                .padding = CLAY_PADDING_ALL(4),
+              },
+              .floating = { .attachTo = CLAY_ATTACH_TO_PARENT, .attachPoints = { .element = CLAY_ATTACH_POINT_LEFT_TOP, .parent = CLAY_ATTACH_POINT_LEFT_BOTTOM }, .offset = { .x = 0, .y = 6 }, .zIndex = 1000, .pointerCaptureMode = CLAY_POINTER_CAPTURE_MODE_CAPTURE, .clipTo = CLAY_CLIP_TO_NONE },
+              .backgroundColor = (Clay_Color){240,240,240,255},
+            }) {
+            CLAY(CLAY_ID("TestOpt100"), {.layout = {.sizing = {.width = CLAY_SIZING_FIT(), .height = CLAY_SIZING_FIT()}}}) {
+              Clay_OnHover(handle_test_option_100, NULL);
+              CLAY_TEXT(CLAY_STRING("Test 100 random moves"), CLAY_TEXT_CONFIG({.fontSize=20, .textColor=(Clay_Color){0,0,0,255}}));
+            }
+            CLAY(CLAY_ID("TestOpt500"), {.layout = {.sizing = {.width = CLAY_SIZING_FIT(), .height = CLAY_SIZING_FIT()}}}) {
+              Clay_OnHover(handle_test_option_500, NULL);
+              CLAY_TEXT(CLAY_STRING("Test 500 random moves"), CLAY_TEXT_CONFIG({.fontSize=20, .textColor=(Clay_Color){0,0,0,255}}));
+            }
+            CLAY(CLAY_ID("TestOpt1000"), {.layout = {.sizing = {.width = CLAY_SIZING_FIT(), .height = CLAY_SIZING_FIT()}}}) {
+              Clay_OnHover(handle_test_option_1000, NULL);
+              CLAY_TEXT(CLAY_STRING("Test 1000 random moves"), CLAY_TEXT_CONFIG({.fontSize=20, .textColor=(Clay_Color){0,0,0,255}}));
+            }
+          }
         }
         }
     CLAY_TEXT(CLAY_STRING("Move history:"), CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
