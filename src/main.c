@@ -11,7 +11,7 @@
 #include "clay_renderer_raylib.c"
 #include <string.h>
 
-void HandleClayErrors(Clay_ErrorData error_data) {
+void handle_clay_errors(Clay_ErrorData error_data) {
   fprintf(stderr, "CLAY ERROR: %s\n", error_data.errorText.chars);
   exit(1);
 }
@@ -61,7 +61,7 @@ int main(void) {
   Clay_Initialize(
       clay_memory,
       (Clay_Dimensions){.width = GetScreenWidth(), .height = GetScreenHeight()},
-      (Clay_ErrorHandler){HandleClayErrors, NULL});
+      (Clay_ErrorHandler){handle_clay_errors, NULL});
 
   Font fonts[1] = {LoadFontFromMemory(".ttf", roboto, roboto_size, 60, NULL, 0)};
   Clay_SetMeasureTextFunction(Raylib_MeasureText, fonts);
