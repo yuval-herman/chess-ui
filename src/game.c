@@ -36,7 +36,7 @@ void game_set_board(char *board) {
   int black_count = 0;
   for (int i = 0; i<8*4; i++) {
     if (board[i]=='#') continue;
-    if (is_piece_white(board[i])) white_count++;
+    if (protocol_is_piece_white(board[i])) white_count++;
     else black_count++;
   }
   STATE.white_up = white_count >= black_count;
@@ -68,7 +68,7 @@ void game_initGameState() {
 DataMove game_make_chess_move(Move move) {
   assert(!game_is_viewing_history());
 #ifndef UI_WORK
-  int backend_code = get_move_code(move);
+  int backend_code = protocol_get_move_code(move);
 #else
   int backend_code = 0;
 #endif
@@ -78,14 +78,14 @@ DataMove game_make_chess_move(Move move) {
       .src_piece = STATE.board[move.src.row][move.src.col],
       .dst_piece = STATE.board[move.dst.row][move.dst.col],
 #ifdef TESTER_MODE // tester mode needs to report issues
-      .backend_code = backend_code,
-      .tester_code = is_move_legal(move),
+  .backend_code = backend_code,
+  .tester_code = rules_is_move_legal(move),
 #else // normal operation mode fully depends on the backend
       .backend_code = backend_code,
       .tester_code = backend_code,
 #endif
   };
-  if (is_code_legal(backend_code)) {
+  if (protocol_is_code_legal(backend_code)) {
     MovesDA *moves = &STATE.moves;
     assert(moves->capacity); // Capacity should be initialized elsewhere
     if (moves->count == moves->capacity) {
@@ -151,7 +151,7 @@ int game_get_white_count() {
   int count = 0;
   for (int i = 0; i < 8 * 8; i++) {
     char piece = ((char *)STATE.board)[i];
-    if (piece != '#' && is_piece_white(piece))
+    if (piece != '#' && protocol_is_piece_white(piece))
       count++;
   }
   return count;
@@ -161,7 +161,7 @@ int game_get_black_count() {
   int count = 0;
   for (int i = 0; i < 8 * 8; i++) {
     char piece = ((char *)STATE.board)[i];
-    if (piece != '#' && !is_piece_white(piece))
+    if (piece != '#' && !protocol_is_piece_white(piece))
       count++;
   }
   return count;
@@ -174,7 +174,7 @@ Cell game_get_random_player_cell(bool white) {
   for (int row = 0; row < 8; row++) {
     for (int col = 0; col < 8; col++) {
       char piece = STATE.board[row][col];
-      if (piece != '#' && white == is_piece_white(piece)) count++;
+      if (piece != '#' && white == protocol_is_piece_white(piece)) count++;
       if (count == selected_piece_index) return (Cell){.col = col, .row = row};
     }
   }

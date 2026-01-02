@@ -138,16 +138,16 @@ void print_move_types(bitset move_types) {
   fprintf(stderr, "\n");
 }
 
-Move_Codes is_move_legal(Move move) {
+Move_Codes rules_is_move_legal(Move move) {
   if (is_move_stationary(move))
     return MOVE_STATIONARY;
-  if (move.piece_moved == '#' || game_is_whites_turn() != is_piece_white(move.piece_moved))
+  if (move.piece_moved == '#' || game_is_whites_turn() != protocol_is_piece_white(move.piece_moved))
     return MOVE_INVALID_SOURCE;
   if (is_move_OOB(move))
     return MOVE_OUT_OF_BOUNDS;
 
   char dst_piece = game_get_piece_at(move.dst);
-  if (dst_piece != '#' && game_is_whites_turn() == is_piece_white(dst_piece))
+  if (dst_piece != '#' && game_is_whites_turn() == protocol_is_piece_white(dst_piece))
     return MOVE_FRIENDLY_FIRE;
   bitset piece_move_type = get_piece_move_types(move.piece_moved);
   debug_print("%c movement type are:", move.piece_moved);
@@ -161,7 +161,7 @@ Move_Codes is_move_legal(Move move) {
   return MOVE_VALID;
 }
 
-Cell get_random_move_cell(Cell src) {
+Cell rules_get_random_move_cell(Cell src) {
   Cell options[64];
   int opt_count = 0;
   char piece = game_get_piece_at(src);
@@ -172,7 +172,7 @@ Cell get_random_move_cell(Cell src) {
     for (int c = 0; c < 8; c++) {
       Cell dst = {.row = r, .col = c};
       Move m = {.src = src, .dst = dst, .piece_moved = piece};
-      if (is_move_legal(m) == MOVE_VALID) {
+      if (rules_is_move_legal(m) == MOVE_VALID) {
         options[opt_count++] = dst;
       }
     }

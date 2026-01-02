@@ -150,7 +150,7 @@ void do_move(Cell src, Cell dst) {
   UI.state.backend_code = move.backend_code;
   UI.state.tester_code = move.tester_code;
 
-  if (!is_code_legal(UI.state.backend_code)) UI.state.banner_timeout = BANNER_TIMEOUT;
+  if (!protocol_is_code_legal(UI.state.backend_code)) UI.state.banner_timeout = BANNER_TIMEOUT;
 }
 
 void handle_test_button_hover(Clay_ElementId element_id, Clay_PointerData pointer_data,
@@ -231,7 +231,7 @@ void handle_board_cell_hover(Clay_ElementId element_id,
 }
 
 void get_move_repr(char *buffer, Move move) {
-  char* repr = move_repr(move);
+  char* repr = protocol_move_repr(move);
   
   buffer[0] = repr[0];
   buffer[1] = repr[1];
@@ -261,7 +261,7 @@ void turn_indicator(bool is_white) {
 }
 
 void illegal_move_banner() {
-  if (is_code_legal(UI.state.backend_code) || UI.state.banner_timeout < 0)
+  if (protocol_is_code_legal(UI.state.backend_code) || UI.state.banner_timeout < 0)
     return;
   UI.state.banner_timeout--;
   CLAY(CLAY_ID("IllegalMoveBanner"), {
@@ -276,7 +276,7 @@ void illegal_move_banner() {
       .floating = {.attachTo = CLAY_ATTACH_TO_PARENT}
      }) {
     Clay_OnHover(handle_banner_hover, NULL);
-    const char *message = code2str(UI.state.backend_code);
+    const char *message = protocol_code2str(UI.state.backend_code);
     Clay_String clay_str = {
         .isStaticallyAllocated = true,
         .chars = message,
@@ -510,7 +510,7 @@ void main_layout() {
     Cell src = game_get_random_player_cell(game_is_whites_turn());
     UI.state.selected.row = src.row;
     UI.state.selected.col = src.col;
-    Cell dst = get_random_move_cell(src);
+    Cell dst = rules_get_random_move_cell(src);
     do_move(src, dst);
     UI.state.banner_timeout = -1;
     UI.state.random_moves_left--;

@@ -37,7 +37,7 @@ void protocol_close() {
   pipe_close();
 }
 
-const char* code2str(int code) {
+const char* protocol_code2str(int code) {
   switch (code) {
   case MOVE_VALID : return "Valid move";
   case MOVE_CHECK: return "Check";
@@ -52,17 +52,17 @@ const char* code2str(int code) {
   }
 }
 
-bool is_code_legal(int code) {
+bool protocol_is_code_legal(int code) {
   return code == MOVE_VALID || code == MOVE_CHECK || code == MOVE_CHECKMATE;
 }
 
-int get_move_code(Move move) {
-  pipe_send_message(move_repr(move));
+int protocol_get_move_code(Move move) {
+  pipe_send_message(protocol_move_repr(move));
   char* backend_msg = pipe_get_message();
   return backend_msg[0] - '0';
 }
 
-char *move_repr(Move move) {
+char *protocol_move_repr(Move move) {
   assert(move.src.col + 'a' <= CHAR_MAX);
   assert(7 - move.src.row + '1' <= CHAR_MAX);
   assert(move.dst.col + 'a' <= CHAR_MAX);
@@ -76,7 +76,7 @@ char *move_repr(Move move) {
   return move_repr_buffer;
 }
 
-bool is_piece_white(char piece) {
+bool protocol_is_piece_white(char piece) {
   if(piece=='#') debug_print("Trying to check if an empty piece is white!");
   return isupper(piece);
 }
