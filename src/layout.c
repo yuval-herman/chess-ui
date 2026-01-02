@@ -17,6 +17,18 @@
 #define RANDOM_TESTS_100 100
 #define RANDOM_TESTS_500 500
 
+#define BANNER_TIMEOUT 120
+#define MOVE_REPR_LENGTH 6
+
+#define BACKGROUND        (Clay_Color){80, 80, 80, 255}
+#define LIGHT_BACKGROUND  (Clay_Color){150, 150, 150, 255}
+#define BOARD_BACKGROUND  (Clay_Color){112, 112, 112, 255}
+#define EVEN_CELL         (Clay_Color){100, 100, 100, 255}
+#define ODD_CELL          (Clay_Color){125, 125, 125, 255}
+#define HIGHLIGHTED_CELL  (Clay_Color){125, 125, 100, 255}
+#define TURN_INDICATOR    (Clay_Color){125, 125, 100, 255}
+#define BANNER_BACKGROUND (Clay_Color){200, 125, 125, 175}
+
 typedef struct {
   struct {
     struct {
@@ -35,16 +47,6 @@ typedef struct {
     } chess_pieces;
   } textures;
   struct {
-      Clay_Color background;
-      Clay_Color board_background;
-      Clay_Color light_background;
-      Clay_Color even_cell;
-      Clay_Color odd_cell;
-      Clay_Color highlighted_cell;
-      Clay_Color turn_indicator;
-      Clay_Color banner_background;
-  } colors;
-  struct {
     Cell selected;
     int backend_code; // last code received from the backend
     int tester_code;  // last code from inner tester
@@ -57,58 +59,26 @@ typedef struct {
   size_t moves_log_buffer_length;
 } UIData;
 
-
-#define BANNER_TIMEOUT 120
-#define MOVE_REPR_LENGTH 6
-
 UIData UI = {0};
 
-void initUIData() {
-  Image b_bishop = LoadImageFromMemory(".png", bd, bd_size);
-  UI.textures.chess_pieces.b_bishop = LoadTextureFromImage(b_bishop);
-  UnloadImage(b_bishop);
-  Image w_bishop = LoadImageFromMemory(".png", bl, bl_size);
-  UI.textures.chess_pieces.w_bishop = LoadTextureFromImage(w_bishop);
-  UnloadImage(w_bishop);
-  Image b_king = LoadImageFromMemory(".png", kd, kd_size);
-  UI.textures.chess_pieces.b_king   = LoadTextureFromImage(b_king);
-  UnloadImage(b_king);
-  Image w_king = LoadImageFromMemory(".png", kl, kl_size);
-  UI.textures.chess_pieces.w_king   = LoadTextureFromImage(w_king);
-  UnloadImage(w_king);
-  Image b_knight = LoadImageFromMemory(".png", nd, nd_size);
-  UI.textures.chess_pieces.b_knight = LoadTextureFromImage(b_knight);
-  UnloadImage(b_knight);
-  Image w_knight = LoadImageFromMemory(".png", nl, nl_size);
-  UI.textures.chess_pieces.w_knight = LoadTextureFromImage(w_knight);
-  UnloadImage(w_knight);
-  Image b_pawn = LoadImageFromMemory(".png", pd, pd_size);
-  UI.textures.chess_pieces.b_pawn   = LoadTextureFromImage(b_pawn);
-  UnloadImage(b_pawn);
-  Image w_pawn = LoadImageFromMemory(".png", pl, pl_size);
-  UI.textures.chess_pieces.w_pawn   = LoadTextureFromImage(w_pawn);
-  UnloadImage(w_pawn);
-  Image b_queen = LoadImageFromMemory(".png", qd, qd_size);
-  UI.textures.chess_pieces.b_queen  = LoadTextureFromImage(b_queen);
-  UnloadImage(b_queen);
-  Image w_queen = LoadImageFromMemory(".png", ql, ql_size);
-  UI.textures.chess_pieces.w_queen  = LoadTextureFromImage(w_queen);
-  UnloadImage(w_queen);
-  Image b_rook = LoadImageFromMemory(".png", rd, rd_size);
-  UI.textures.chess_pieces.b_rook   = LoadTextureFromImage(b_rook);
-  UnloadImage(b_rook);
-  Image w_rook = LoadImageFromMemory(".png", rl, rl_size);
-  UI.textures.chess_pieces.w_rook   = LoadTextureFromImage(w_rook);
-  UnloadImage(w_rook);
+#define load_texture(name, data, size)                                                   \
+  Image name = LoadImageFromMemory(".png", data, size);                                  \
+  UI.textures.chess_pieces.name = LoadTextureFromImage(name);                          \
+  UnloadImage(name);
 
-  UI.colors.background        = (Clay_Color){80, 80, 80, 255};
-  UI.colors.light_background  = (Clay_Color){150, 150, 150, 255};
-  UI.colors.board_background  = (Clay_Color){112, 112, 112, 255};
-  UI.colors.even_cell         = (Clay_Color){100, 100, 100, 255};
-  UI.colors.odd_cell          = (Clay_Color){125, 125, 125, 255};
-  UI.colors.highlighted_cell  = (Clay_Color){125, 125, 100, 255};
-  UI.colors.turn_indicator    = (Clay_Color){125, 125, 100, 255};
-  UI.colors.banner_background = (Clay_Color){200, 125, 125, 175};
+void initUIData() {
+  load_texture(b_bishop, bd, bd_size)
+  load_texture(w_bishop, bl, bl_size)
+  load_texture(b_king, kd, kd_size)
+  load_texture(w_king, kl, kl_size)
+  load_texture(b_knight, nd, nd_size)
+  load_texture(w_knight, nl, nl_size)
+  load_texture(b_pawn, pd, pd_size)
+  load_texture(w_pawn, pl, pl_size)
+  load_texture(b_queen, qd, qd_size)
+  load_texture(w_queen, ql, ql_size)
+  load_texture(b_rook, rd, rd_size)
+  load_texture(w_rook, rl, rl_size)
 
   UI.state.selected       = (Cell){-1, -1};
   UI.state.backend_code   = -1;
@@ -245,9 +215,9 @@ void turn_indicator(bool is_white) {
   Clay_Color color = {0};
     if (game_is_whites_turn()) {
     if (is_white)
-      color = UI.colors.turn_indicator;
+      color = TURN_INDICATOR;
   } else if (!is_white) {
-    color = UI.colors.turn_indicator;
+    color = TURN_INDICATOR;
   }
   CLAY(CLAY_IDI("TurnIndicator", (int)is_white), {
     .layout = {
@@ -272,7 +242,7 @@ void illegal_move_banner() {
          },
          .childAlignment = {.x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER}
        },
-      .backgroundColor = UI.colors.banner_background,
+      .backgroundColor = BANNER_BACKGROUND,
       .floating = {.attachTo = CLAY_ATTACH_TO_PARENT}
      }) {
     Clay_OnHover(handle_banner_hover, NULL);
@@ -290,7 +260,7 @@ void illegal_move_banner() {
 }
 
 void board_cell(int row, int col) {
-  Clay_Color cell_color = (row + col) % 2 ? UI.colors.odd_cell : UI.colors.even_cell;
+  Clay_Color cell_color = (row + col) % 2 ? ODD_CELL : EVEN_CELL;
   bool cell_selected = row == UI.state.selected.row && col == UI.state.selected.col;
   CLAY(CLAY_IDI("cell", col + row * 8),{
         .layout = {
@@ -300,7 +270,7 @@ void board_cell(int row, int col) {
             }
           },
         .cornerRadius = CLAY_CORNER_RADIUS(4),
-        .backgroundColor = (Clay_Hovered() || cell_selected) ? UI.colors.highlighted_cell : cell_color,
+        .backgroundColor = (Clay_Hovered() || cell_selected) ? HIGHLIGHTED_CELL : cell_color,
         .aspectRatio = {.aspectRatio = 1}
   }) {
     Clay_OnHover(handle_board_cell_hover, NULL);
@@ -328,7 +298,7 @@ void board_layout() {
           .childGap = 8,
           .padding = CLAY_PADDING_ALL(8),
       },
-      .backgroundColor = UI.colors.board_background,
+      .backgroundColor = BOARD_BACKGROUND,
   }) {
     turn_indicator(game_is_white_up());
     for (int row = 0; row < 8; row++) {
@@ -362,7 +332,7 @@ void info_panel() {
       .layoutDirection = CLAY_TOP_TO_BOTTOM,
       .padding = CLAY_PADDING_ALL(8)
     },
-    .backgroundColor = UI.colors.board_background
+    .backgroundColor = BOARD_BACKGROUND
   }) {
       CLAY(CLAY_ID("PieceCountsContainer"),
            {.layout = {.padding = CLAY_PADDING_ALL(8),
@@ -449,7 +419,7 @@ void info_panel() {
           .padding = CLAY_PADDING_ALL(8)
         },
         .clip = {.vertical = true, .childOffset = Clay_GetScrollOffset()},
-        .backgroundColor = UI.colors.light_background
+        .backgroundColor = LIGHT_BACKGROUND
       }
     ) {
       DataMovesArr moves = game_get_moves_log();
@@ -469,8 +439,8 @@ void info_panel() {
         get_move_repr(buffer_slice, moves.items[i].move);
         Clay_Color bg_color =
             moves.items[i].tester_code == moves.items[i].backend_code
-                ? UI.colors.board_background
-                : UI.colors.banner_background;
+                ? BOARD_BACKGROUND
+                : BANNER_BACKGROUND;
             CLAY(CLAY_IDI("MoveContainer", i),
                  {
                      .layout =
@@ -480,7 +450,7 @@ void info_panel() {
                              .childAlignment = {.y = CLAY_ALIGN_Y_CENTER},
                          },
                      .backgroundColor =
-                         Clay_Hovered() ? UI.colors.highlighted_cell : bg_color,
+                         Clay_Hovered() ? HIGHLIGHTED_CELL : bg_color,
                  }) {
           UI.state.move_log_hover = false;
           Clay_OnHover(handle_move_log_hover, NULL);
@@ -532,7 +502,7 @@ void main_layout() {
           .childAlignment = {.x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER},
           .childGap = 8
         },
-        .backgroundColor = UI.colors.background,
+        .backgroundColor = BACKGROUND,
   }) {
     illegal_move_banner();
     board_layout();
