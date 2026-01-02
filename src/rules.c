@@ -30,7 +30,7 @@ bool is_move_stationary(Move move) {
 
 // Helper macro for is_way_free
 #define check_piece                                                            \
-  char piece = get_piece_at(cur);                                              \
+  char piece = game_get_piece_at(cur);                                              \
   debug_print("Checking piece: %c at (%d,%d)", piece, cur.col + 1,             \
               cur.row + 1);                                                    \
   if (piece != '#')                                                            \
@@ -141,13 +141,13 @@ void print_move_types(bitset move_types) {
 Move_Codes is_move_legal(Move move) {
   if (is_move_stationary(move))
     return MOVE_STATIONARY;
-  if (move.piece_moved == '#' || is_whites_turn() != is_piece_white(move.piece_moved))
+  if (move.piece_moved == '#' || game_is_whites_turn() != is_piece_white(move.piece_moved))
     return MOVE_INVALID_SOURCE;
   if (is_move_OOB(move))
     return MOVE_OUT_OF_BOUNDS;
 
-  char dst_piece = get_piece_at(move.dst);
-  if (dst_piece != '#' && is_whites_turn() == is_piece_white(dst_piece))
+  char dst_piece = game_get_piece_at(move.dst);
+  if (dst_piece != '#' && game_is_whites_turn() == is_piece_white(dst_piece))
     return MOVE_FRIENDLY_FIRE;
   bitset piece_move_type = get_piece_move_types(move.piece_moved);
   debug_print("%c movement type are:", move.piece_moved);
@@ -164,7 +164,7 @@ Move_Codes is_move_legal(Move move) {
 Cell get_random_move_cell(Cell src) {
   Cell options[64];
   int opt_count = 0;
-  char piece = get_piece_at(src);
+  char piece = game_get_piece_at(src);
   if (piece == '#')
     return (Cell){.row = -1, .col = -1};
 

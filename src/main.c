@@ -52,7 +52,7 @@ int main(void) {
   Clay_Raylib_Initialize(1500, 800, "chess", FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
 
   initUIData();
-  initGameState();
+  game_initGameState();
 
   uint64_t clay_required_memory = Clay_MinMemorySize();
 

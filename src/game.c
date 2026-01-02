@@ -26,11 +26,11 @@ typedef struct {
 
 GameState STATE = {0};
 
-bool is_viewing_history() {
+bool game_is_viewing_history() {
   return STATE.showing_move != STATE.moves.count;
 }
 
-void set_board(char *board) {
+void game_set_board(char *board) {
   memcpy(STATE.board, board, 8 * 8);
   int white_count = 0;
   int black_count = 0;
@@ -42,11 +42,11 @@ void set_board(char *board) {
   STATE.white_up = white_count >= black_count;
 }
 
-bool is_whites_turn() { return STATE.white_turn; }
-void set_whites_turn(bool turn) { STATE.white_turn = turn; }
-bool is_white_up() { return STATE.white_up; }
+bool game_is_whites_turn() { return STATE.white_turn; }
+void game_set_whites_turn(bool turn) { STATE.white_turn = turn; }
+bool game_is_white_up() { return STATE.white_up; }
 
-void initGameState() {
+void game_initGameState() {
 #ifdef UI_WORK
   // default board, good for testing
   char board[8][8] = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
@@ -57,16 +57,16 @@ void initGameState() {
                       {'#', '#', '#', '#', '#', '#', '#', '#'},
                       {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
                       {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}};
-  set_board((char*)board);
-  set_whites_turn(true);
+  game_set_board((char*)board);
+  game_set_whites_turn(true);
 #endif
 
   STATE.moves.capacity = 1;
   STATE.moves.items = malloc(sizeof(STATE.moves.items[0]));
 }
 
-DataMove make_chess_move(Move move) {
-  assert(!is_viewing_history());
+DataMove game_make_chess_move(Move move) {
+  assert(!game_is_viewing_history());
 #ifndef UI_WORK
   int backend_code = get_move_code(move);
 #else
@@ -105,26 +105,26 @@ DataMove make_chess_move(Move move) {
   return data_move;
 }
 
-char get_piece_at(Cell cell) {
+char game_get_piece_at(Cell cell) {
   assert(cell.col >= 0 && cell.col <= 7);
   assert(cell.row >= 0 && cell.row <= 7);
   return STATE.board[cell.row][cell.col];
 }
 
-DataMovesArr get_moves_log() {
+DataMovesArr game_get_moves_log() {
   return (DataMovesArr){.items = STATE.moves.items, .count = STATE.moves.count};
 }
 
-size_t get_moves_count() {
+size_t game_get_moves_count() {
   return STATE.moves.count;
 }
 
-void make_move_backward(DataMove move) {
+static void game__make_move_backward(DataMove move) {
   STATE.board[move.move.src.row][move.move.src.col] = move.src_piece;
   STATE.board[move.move.dst.row][move.move.dst.col] = move.dst_piece;
 }
 
-void make_move_forwards(DataMove move) {
+static void game__make_move_forwards(DataMove move) {
   if (move.dst_piece == '#')
     STATE.board[move.move.src.row][move.move.src.col] = move.dst_piece;
   else
@@ -132,22 +132,22 @@ void make_move_forwards(DataMove move) {
   STATE.board[move.move.dst.row][move.move.dst.col] = move.src_piece;
 }
 
-void show_board_at(size_t move_index) {
+void game_show_board_at(size_t move_index) {
   assert(move_index < STATE.moves.count);
-  reset_board();
+  game_reset_board();
   for (size_t i = STATE.moves.count; i > move_index; i--) {
-    make_move_backward(STATE.moves.items[i - 1]);
+    game__make_move_backward(STATE.moves.items[i - 1]);
     STATE.showing_move = i - 1;
   }
 }
 
-void reset_board() {
+void game_reset_board() {
   for (; STATE.showing_move < STATE.moves.count; STATE.showing_move++) {
-    make_move_forwards(STATE.moves.items[STATE.showing_move]);
+    game__make_move_forwards(STATE.moves.items[STATE.showing_move]);
   }
 }
 
-int get_white_count() {
+int game_get_white_count() {
   int count = 0;
   for (int i = 0; i < 8 * 8; i++) {
     char piece = ((char *)STATE.board)[i];
@@ -157,7 +157,7 @@ int get_white_count() {
   return count;
 }
 
-int get_black_count() {
+int game_get_black_count() {
   int count = 0;
   for (int i = 0; i < 8 * 8; i++) {
     char piece = ((char *)STATE.board)[i];
@@ -167,8 +167,8 @@ int get_black_count() {
   return count;
 }
 
-Cell get_random_player_cell(bool white) {
-  int piece_count = white ? get_white_count() : get_black_count();
+Cell game_get_random_player_cell(bool white) {
+  int piece_count = white ? game_get_white_count() : game_get_black_count();
   int selected_piece_index = GetRandomValue(1, piece_count);
   int count = 0;
   for (int row = 0; row < 8; row++) {

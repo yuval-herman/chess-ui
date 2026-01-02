@@ -142,10 +142,10 @@ Texture2D* piece2tex(char piece) {
 }
 
 void do_move(Cell src, Cell dst) {
-  DataMove move = make_chess_move((Move){
+  DataMove move = game_make_chess_move((Move){
     .src = src,
     .dst = dst,
-    .piece_moved = get_piece_at(src),
+    .piece_moved = game_get_piece_at(src),
   });
   UI.state.backend_code = move.backend_code;
   UI.state.tester_code = move.tester_code;
@@ -197,7 +197,7 @@ void handle_move_log_hover(Clay_ElementId element_id, Clay_PointerData pointer_d
   // TODO: actually require clicking the log entry
   // if(pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME)
   UI.state.move_log_hover = true;
-  show_board_at(element_id.offset);
+  game_show_board_at(element_id.offset);
 }
 
 void handle_banner_hover(Clay_ElementId element_id, Clay_PointerData pointer_data, void* user_data) {
@@ -243,7 +243,7 @@ void get_move_repr(char *buffer, Move move) {
 
 void turn_indicator(bool is_white) {
   Clay_Color color = {0};
-  if (is_whites_turn()) {
+    if (game_is_whites_turn()) {
     if (is_white)
       color = UI.colors.turn_indicator;
   } else if (!is_white) {
@@ -311,7 +311,7 @@ void board_cell(int row, int col) {
           .width = CLAY_SIZING_GROW(0),
         }
       },
-      .image = { .imageData = piece2tex(get_piece_at((Cell){.row = row, .col = col})) },
+      .image = { .imageData = piece2tex(game_get_piece_at((Cell){.row = row, .col = col})) },
       .aspectRatio = {1}
     }) {}
   }
@@ -330,7 +330,7 @@ void board_layout() {
       },
       .backgroundColor = UI.colors.board_background,
   }) {
-    turn_indicator(is_white_up());
+    turn_indicator(game_is_white_up());
     for (int row = 0; row < 8; row++) {
       CLAY(CLAY_IDI("RowContainer", row), {
             .layout = {
@@ -347,7 +347,7 @@ void board_layout() {
         }
       }
     }
-    turn_indicator(!is_white_up());
+    turn_indicator(!game_is_white_up());
   }
 }
 
@@ -378,7 +378,7 @@ void info_panel() {
               .image = {.imageData = &UI.textures.chess_pieces.b_pawn},
               .aspectRatio = {1}}) {}
         char* t_buffer = (char*)piece_count_buffer;
-        snprintf(t_buffer, 3, "%u", get_white_count());
+        snprintf(t_buffer, 3, "%u", game_get_white_count());
         Clay_String white_count_str = {.length = 2, .isStaticallyAllocated = true, .chars = t_buffer};
         CLAY_TEXT(white_count_str, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
         CLAY(CLAY_ID("WhitePieceIcon"),
@@ -390,7 +390,7 @@ void info_panel() {
               .image = {.imageData = &UI.textures.chess_pieces.w_pawn},
               .aspectRatio = {1}}) {}
         t_buffer = (char *)piece_count_buffer + 3;
-        snprintf(t_buffer, 3, "%u", get_black_count());
+        snprintf(t_buffer, 3, "%u", game_get_black_count());
         Clay_String black_count_str = {.length = 2, .isStaticallyAllocated = true, .chars = t_buffer};
         CLAY_TEXT(black_count_str, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
         CLAY(CLAY_ID("TestButton"),
@@ -452,7 +452,7 @@ void info_panel() {
         .backgroundColor = UI.colors.light_background
       }
     ) {
-      DataMovesArr moves = get_moves_log();
+      DataMovesArr moves = game_get_moves_log();
       if (UI.moves_log_buffer_length < moves.count * MOVE_REPR_LENGTH) {
         UI.moves_log_buffer_length *= 2;
         char *buffer = realloc(UI.moves_log_buffer, UI.moves_log_buffer_length);
@@ -503,11 +503,11 @@ void info_panel() {
 
 void main_layout() {
 
-  if (is_viewing_history() && !UI.state.move_log_hover &&
+  if (game_is_viewing_history() && !UI.state.move_log_hover &&
       !Clay_PointerOver(CLAY_ID("MoveHistoryPanel")))
-    reset_board();
+    game_reset_board();
   if (UI.state.random_moves_left > 0) {
-    Cell src = get_random_player_cell(is_whites_turn());
+    Cell src = game_get_random_player_cell(game_is_whites_turn());
     UI.state.selected.row = src.row;
     UI.state.selected.col = src.col;
     Cell dst = get_random_move_cell(src);

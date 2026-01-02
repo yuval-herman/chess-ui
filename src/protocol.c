@@ -25,8 +25,8 @@ bool protocol_has_started() {
     fprintf(stderr, "Got unexpected message: %s\n", pipe_msg);
     return false;
   }
-  set_board(pipe_msg);
-  set_whites_turn(pipe_msg[64] == '0');
+  game_set_board(pipe_msg);
+  game_set_whites_turn(pipe_msg[64] == '0');
   return true;
 }
 
