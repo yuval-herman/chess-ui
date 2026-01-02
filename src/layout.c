@@ -6,7 +6,9 @@
 #include "raylib.h"
 #include "rules.h"
 #include <assert.h>
+#include <limits.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -210,29 +212,33 @@ void handle_board_cell_hover(Clay_ElementId element_id,
                              Clay_PointerData pointer_data, void *user_data) {
   (void)user_data;
   if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-    int col = element_id.offset % 8;
-    int row = (element_id.offset - col) / 8;
+    unsigned int col = element_id.offset % 8;
+    unsigned int row = (element_id.offset - col) / 8;
+    assert(col <= INT_MAX && row <= INT_MAX);
+
     if (UI.state.selected.col >= 0) {
       Cell selected_cell = {UI.state.selected.row, UI.state.selected.col};
-      Cell dst_cell = {row, col};
+      Cell dst_cell = {(int)row, (int)col};
 
       do_move(selected_cell, dst_cell);
       UI.state.selected.col = -1;
       UI.state.selected.row = -1;
     } else {
-      UI.state.selected.col = col;
-      UI.state.selected.row = row;
+      UI.state.selected.col = (int)col;
+      UI.state.selected.row = (int)row;
     }
   }
 }
 
 void get_move_repr(char *buffer, Move move) {
-  buffer[0] = move.src.col + 'a';
-  buffer[1] = 7 - move.src.row + '1';
+  char* repr = move_repr(move);
+  
+  buffer[0] = repr[0];
+  buffer[1] = repr[1];
   buffer[2] = ',';
   buffer[3] = ' ';
-  buffer[4] = move.dst.col + 'a';
-  buffer[5] = 7 - move.dst.row + '1';
+  buffer[4] = repr[2];
+  buffer[5] = repr[3];
 }
 
 void turn_indicator(bool is_white) {
@@ -274,7 +280,7 @@ void illegal_move_banner() {
     Clay_String clay_str = {
         .isStaticallyAllocated = true,
         .chars = message,
-        .length = strlen(message),
+        .length = (int)strlen(message),
     };
     CLAY_TEXT(clay_str, CLAY_TEXT_CONFIG({
                             .fontSize = 60,
@@ -372,7 +378,7 @@ void info_panel() {
               .image = {.imageData = &UI.textures.chess_pieces.b_pawn},
               .aspectRatio = {1}}) {}
         char* t_buffer = (char*)piece_count_buffer;
-        snprintf(t_buffer, 3, "%zu", get_white_count());
+        snprintf(t_buffer, 3, "%u", get_white_count());
         Clay_String white_count_str = {.length = 2, .isStaticallyAllocated = true, .chars = t_buffer};
         CLAY_TEXT(white_count_str, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){0, 0, 0, 255}}));
         CLAY(CLAY_ID("WhitePieceIcon"),
@@ -384,7 +390,7 @@ void info_panel() {
               .image = {.imageData = &UI.textures.chess_pieces.w_pawn},
               .aspectRatio = {1}}) {}
         t_buffer = (char *)piece_count_buffer + 3;
-        snprintf(t_buffer, 3, "%zu", get_black_count());
+        snprintf(t_buffer, 3, "%u", get_black_count());
         Clay_String black_count_str = {.length = 2, .isStaticallyAllocated = true, .chars = t_buffer};
         CLAY_TEXT(black_count_str, CLAY_TEXT_CONFIG({.fontSize = 32, .textColor = (Clay_Color){255, 255, 255, 255}}));
         CLAY(CLAY_ID("TestButton"),
@@ -449,7 +455,9 @@ void info_panel() {
       DataMovesArr moves = get_moves_log();
       if (UI.moves_log_buffer_length < moves.count * MOVE_REPR_LENGTH) {
         UI.moves_log_buffer_length *= 2;
-        UI.moves_log_buffer = realloc(UI.moves_log_buffer, UI.moves_log_buffer_length);
+        char *buffer = realloc(UI.moves_log_buffer, UI.moves_log_buffer_length);
+        assert(buffer && "Memory allocation failed");
+        UI.moves_log_buffer = buffer;
       }
       for (size_t i = 0; i < moves.count; i++) {
         char* buffer_slice = UI.moves_log_buffer + i * MOVE_REPR_LENGTH + 1;

@@ -3,8 +3,10 @@
 #include "definitions.h"
 #include "game.h"
 #include <ctype.h>
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 char move_repr_buffer[5];
 
@@ -61,10 +63,15 @@ int get_move_code(Move move) {
 }
 
 char *move_repr(Move move) {
-  move_repr_buffer[0] = move.src.col + 'a';
-  move_repr_buffer[1] = 7 - move.src.row + '1';
-  move_repr_buffer[2] = move.dst.col + 'a';
-  move_repr_buffer[3] = 7 - move.dst.row + '1';
+  assert(move.src.col + 'a' <= CHAR_MAX);
+  assert(7 - move.src.row + '1' <= CHAR_MAX);
+  assert(move.dst.col + 'a' <= CHAR_MAX);
+  assert(7 - move.dst.row + '1' <= CHAR_MAX);
+
+  move_repr_buffer[0] = (char)(move.src.col + 'a');
+  move_repr_buffer[1] = (char)(7 - move.src.row + '1');
+  move_repr_buffer[2] = (char)(move.dst.col + 'a');
+  move_repr_buffer[3] = (char)(7 - move.dst.row + '1');
   move_repr_buffer[4] = '\0';
   return move_repr_buffer;
 }

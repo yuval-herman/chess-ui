@@ -90,8 +90,9 @@ DataMove make_chess_move(Move move) {
     assert(moves->capacity); // Capacity should be initialized elsewhere
     if (moves->count == moves->capacity) {
       moves->capacity *= 2;
-      moves->items =
-          realloc(moves->items, moves->capacity * sizeof(moves->items[0]));
+      DataMove* new_arr = realloc(moves->items, moves->capacity * sizeof(moves->items[0]));
+      assert(new_arr && "Memory allocation failed");
+      moves->items = new_arr;
     }
     moves->items[moves->count++] = data_move;
     STATE.showing_move = moves->count;
@@ -146,9 +147,9 @@ void reset_board() {
   }
 }
 
-size_t get_white_count() {
-  size_t count = 0;
-  for (size_t i = 0; i < 8 * 8; i++) {
+int get_white_count() {
+  int count = 0;
+  for (int i = 0; i < 8 * 8; i++) {
     char piece = ((char *)STATE.board)[i];
     if (piece != '#' && is_piece_white(piece))
       count++;
@@ -156,9 +157,9 @@ size_t get_white_count() {
   return count;
 }
 
-size_t get_black_count() {
-  size_t count = 0;
-  for (size_t i = 0; i < 8 * 8; i++) {
+int get_black_count() {
+  int count = 0;
+  for (int i = 0; i < 8 * 8; i++) {
     char piece = ((char *)STATE.board)[i];
     if (piece != '#' && !is_piece_white(piece))
       count++;

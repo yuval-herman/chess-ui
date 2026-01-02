@@ -28,10 +28,10 @@ bool wait_for_backend(Font message_font) {
     BeginDrawing();
     ClearBackground(BLACK);
     const char *message = "Waiting for client connection";
-    const int font_size = 24;
+    const float font_size = 24;
     Vector2 measurements = MeasureTextEx(message_font, message, font_size, 1);
-    DrawText(message, (GetScreenWidth() - measurements.x) / 2,
-             (GetScreenHeight() - measurements.y) / 2, font_size, RED);
+    DrawText(message, (GetScreenWidth() - (int)measurements.x) / 2,
+             (GetScreenHeight() - (int)measurements.y) / 2, (int)font_size, RED);
     EndDrawing();
   }
 #else
@@ -60,7 +60,7 @@ int main(void) {
 
   Clay_Initialize(
       clay_memory,
-      (Clay_Dimensions){.width = GetScreenWidth(), .height = GetScreenHeight()},
+      (Clay_Dimensions){.width = (float)GetScreenWidth(), .height = (float)GetScreenHeight()},
       (Clay_ErrorHandler){handle_clay_errors, NULL});
 
   Font fonts[1] = {LoadFontFromMemory(".ttf", roboto, roboto_size, 60, NULL, 0)};
@@ -74,8 +74,8 @@ int main(void) {
   }
 
   while (!WindowShouldClose()) {
-    Clay_SetLayoutDimensions((Clay_Dimensions){.width = GetScreenWidth(),
-                                               .height = GetScreenHeight()});
+    Clay_SetLayoutDimensions((Clay_Dimensions){.width = (float)GetScreenWidth(),
+                                               .height = (float)GetScreenHeight()});
 
     Vector2 mousePosition = GetMousePosition();
     Vector2 scrollDelta = GetMouseWheelMoveV();
