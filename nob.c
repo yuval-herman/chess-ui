@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #define NOB_WARN_DEPRECATED
 #define NOB_EXPERIMENTAL_DELETE_OLD
 #define NOB_IMPLEMENTATION
@@ -28,7 +29,7 @@
 
 // Appends file data as a c-array to given file.
 // Return true on success
-bool pack_data(FILE *output_file, char *arr_name, char *data_file) {
+bool pack_data(FILE *output_file, FILE *header_file, char *arr_name, char *data_file) {
   FILE *file = fopen(data_file, "rb");
   if (!file) {
     fprintf(stderr, "Error opening file: %s\n", data_file);
@@ -36,45 +37,58 @@ bool pack_data(FILE *output_file, char *arr_name, char *data_file) {
     return false;
   }
 
-  generator_append(output_file, "const unsigned char %s[] = {", arr_name);
-  size_t count = 0;
-  int byte;
-  while ((byte = fgetc(file)) != EOF) {
-    fprintf(output_file, "0x%02X,", byte);
-    count++;
+  size_t mark = nob_temp_save(); {
+    char *decl = nob_temp_sprintf("const unsigned char %s[]", arr_name);
+    generator_append(header_file, "extern %s;", decl);
+    generator_append(output_file, "%s = {", decl);
+    size_t count = 0;
+    int byte;
+    while ((byte = fgetc(file)) != EOF) {
+      fprintf(output_file, "0x%02X,", byte);
+      count++;
+    }
+    fseek(output_file, -1, SEEK_CUR);
+    generator_append(output_file, "};");
+    decl = nob_temp_sprintf("const int %s_size", arr_name);
+    generator_append(header_file, "extern %s;", decl);
+    // Raylib expects int in LoadFromFile* functions
+    generator_append(output_file, "%s = %lu;", decl, count);
   }
-  fseek(output_file, -1, SEEK_CUR);
-  generator_append(output_file, "};");
-  // Raylib expects int in LoadFromFile* functions
-  generator_append(output_file, "const int %s_size = %lu;", arr_name, count);
+  nob_temp_rewind(mark);
 
   fclose(file);
   return true;
 }
 
 bool embed_resources() {
-  FILE *packed_file = fopen(PACKED_FILE, "wb");
-  if (!packed_file) {
-    fprintf(stderr, "Couldn't open " PACKED_FILE " for writing\n");
+  FILE *packed_file_header = fopen(PACKED_FILE_HEADER, "wb");
+  if (!packed_file_header) {
+    fprintf(stderr, "Couldn't open " PACKED_FILE_HEADER " for writing\n");
     return false;
   }
-  generator_append(packed_file, "#ifndef PACKED_FILE_H");
-  generator_append(packed_file, "#define PACKED_FILE_H");
+  FILE *packed_file_source = fopen(PACKED_FILE_SOURCE, "wb");
+  if (!packed_file_source) {
+    fprintf(stderr, "Couldn't open " PACKED_FILE_SOURCE " for writing\n");
+    return false;
+  }
+  generator_append(packed_file_source, "#include \"packed_files.h\"");
+  generator_append(packed_file_header, "#ifndef PACKED_FILE_H");
+  generator_append(packed_file_header, "#define PACKED_FILE_H");
 
   // Pack textures
 #define X(arr_name, img_name)                                                                      \
-  if (!pack_data(packed_file, arr_name, img_name)) return 1;
+  if (!pack_data(packed_file_source, packed_file_header, arr_name, img_name)) return 1;
   TEXTURE_LIST
 #undef X
 
   // Pack fonts
 #define X(arr_name, img_name)                                                                      \
-  if (!pack_data(packed_file, arr_name, img_name)) return 1;
+  if (!pack_data(packed_file_source, packed_file_header, arr_name, img_name)) return 1;
   FONT_LIST
 #undef X
 
-  generator_append(packed_file, "#endif // PACKED_FILE_H");
-  fclose(packed_file);
+  generator_append(packed_file_header, "#endif // PACKED_FILE_H");
+  fclose(packed_file_header);
   return true;
 }
 
@@ -104,9 +118,9 @@ int main(int argc, char **argv) {
 
   if(!nob_mkdir_if_not_exists(BUILD_CACHE)) return 1;
 
-  nob_log(NOB_INFO, "packing resources into " PACKED_FILE);
+  nob_log(NOB_INFO, "packing resources into " PACKED_FILE_SOURCE);
   if (!embed_resources()) {
-    nob_log(NOB_ERROR, "failed generating " PACKED_FILE);
+    nob_log(NOB_ERROR, "failed generating " PACKED_FILE_SOURCE);
     return 1;
   }
   bool force = argc > 1;
@@ -115,8 +129,10 @@ int main(int argc, char **argv) {
   nob_cc_flags(&cmd);
   nob_cc_output(&cmd, "main");
   project_flags(&cmd);
+  nob_cc_inputs(&cmd, PACKED_FILE_SOURCE);
   nob_cc_inputs(&cmd, build_file("src/main.c", force));
   nob_cc_inputs(&cmd, build_file("src/game.c", force));
+  nob_cc_inputs(&cmd, build_file("src/layout.c", force));
 #ifdef _WIN32
   nob_cc_inputs(&cmd, build_file("src/communication_windows.c", force));
 #else

@@ -1,5 +1,5 @@
 #include "game.h"
-#include "layout.c"
+#include "layout.h"
 #include "protocol.h"
 #include "raylib.h"
 #include "stdio.h"

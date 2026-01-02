@@ -1,3 +1,4 @@
+#include "layout.h"
 #include "clay.h"
 #include "definitions.h"
 #include "game.h"

@@ -1,7 +1,8 @@
 #ifndef BUILD_DEFINITIONS_H
 #define BUILD_DEFINITIONS_H
 
-#define PACKED_FILE "src/packed_files.h"
+#define PACKED_FILE_HEADER "src/packed_files.h"
+#define PACKED_FILE_SOURCE "src/packed_files.c"
 
 #define TEXTURE_LIST \
 X("bd", "resources/sprites/bd.png")          \
