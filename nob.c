@@ -17,11 +17,13 @@
   fprintf(output_file, format " /* generated in %s:%d */\n", ##__VA_ARGS__,    \
           __FILE__, __LINE__)
 
-// nob_cmd_append(&cmd, "-O0", "-g", "-fsanitize=address,undefined");
-#define project_flags(cmd)                                                     \
-  do {                                                                         \
-    nob_cmd_append(cmd, "-O2", "-march=native");                               \
-    nob_cmd_append(cmd, "-Iraylib/include", "-Iexternal_includes");            \
+// nob_cmd_append(cmd, "-O0", "-g", "-fsanitize=address,undefined");
+// nob_cmd_append(cmd, "-O2", "-march=native");
+
+#define project_flags(cmd)                                                               \
+  do {                                                                                   \
+    nob_cmd_append(cmd, "-O0", "-g", "-fsanitize=address,undefined");                    \
+    nob_cmd_append(cmd, "-Iraylib/include", "-Iexternal_includes");                      \
   } while (0)
 
 // Appends file data as a c-array to given file.
