@@ -78,11 +78,11 @@ bool embed_resources() {
   return true;
 }
 
-char *build_file(char *file_name) {
+char *build_file(char *file_name, bool force) {
   const char *base_file = nob_path_name(file_name);
   char *o_file_path =
       nob_temp_sprintf("%s%.*s.o", BUILD_CACHE, (int)strlen(base_file) - 2, base_file);
-  if (nob_needs_rebuild1(o_file_path, file_name)) {
+  if (force || nob_needs_rebuild1(o_file_path, file_name)) {
     size_t mark = nob_temp_save(); {
       Nob_Cmd cmd = {0};
       nob_cc(&cmd);
@@ -109,20 +109,21 @@ int main(int argc, char **argv) {
     nob_log(NOB_ERROR, "failed generating " PACKED_FILE);
     return 1;
   }
+  bool force = argc > 1;
   Nob_Cmd cmd = {0};
   nob_cc(&cmd);
   nob_cc_flags(&cmd);
   nob_cc_output(&cmd, "main");
   project_flags(&cmd);
-  nob_cc_inputs(&cmd, build_file("src/main.c"));
-  nob_cc_inputs(&cmd, build_file("src/game.c"));
+  nob_cc_inputs(&cmd, build_file("src/main.c", force));
+  nob_cc_inputs(&cmd, build_file("src/game.c", force));
 #ifdef _WIN32
-  nob_cc_inputs(&cmd, build_file("src/communication_windows.c"));
+  nob_cc_inputs(&cmd, build_file("src/communication_windows.c", force));
 #else
-  nob_cc_inputs(&cmd, build_file("src/communication_posix.c"));
+  nob_cc_inputs(&cmd, build_file("src/communication_posix.c", force));
 #endif
-  nob_cc_inputs(&cmd, build_file("src/protocol.c"));
-  nob_cc_inputs(&cmd, build_file("src/rules.c"));
+  nob_cc_inputs(&cmd, build_file("src/protocol.c", force));
+  nob_cc_inputs(&cmd, build_file("src/rules.c", force));
   nob_cmd_append(&cmd, RAYLIB_LIB);
   nob_cmd_append(&cmd, "-lm");
 #ifdef _WIN32
@@ -132,14 +133,5 @@ int main(int argc, char **argv) {
   nob_cmd_append(&cmd, "-DTESTER_MODE");
 
   if (!nob_cmd_run(&cmd)) return 1;
-
-  if (argc > 1) {
-#ifdef _WIN32
-    nob_cmd_append(&cmd, ".\\main.exe");
-#else
-    nob_cmd_append(&cmd, "./main");
-#endif
-    nob_cmd_run(&cmd);
-  }
   return 0;
 }
