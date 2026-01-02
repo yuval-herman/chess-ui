@@ -1,0 +1,10 @@
+---
+BasedOnStyle: LLVM
+IndentWidth: 2
+ColumnLimit: 90
+
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+BracedInitializerIndentWidth: 2
+# AllowShortCaseExpressionOnASingleLine: true
+# AllowShortCaseLabelsOnASingleLine: true
+---

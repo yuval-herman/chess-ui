@@ -1,0 +1,9 @@
+Diagnostics:
+  ClangTidy:
+    Add:
+      - 'bugprone-*'
+      - 'misc-*'
+    Remove:
+      - 'bugprone-easily-swappable-parameters'
+      - 'bugprone-implicit-widening-of-multiplication-result'
+      - 'bugprone-suspicious-include'
